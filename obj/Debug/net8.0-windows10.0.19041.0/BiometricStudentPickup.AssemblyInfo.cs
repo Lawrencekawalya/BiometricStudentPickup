@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BiometricStudentPickup")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+755dc5e649cc68ebe7acdab39a6ab2f7fab6815e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d915dc3699d96ee5fd58a02e6b29b0046584f3bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("BiometricStudentPickup")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BiometricStudentPickup")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

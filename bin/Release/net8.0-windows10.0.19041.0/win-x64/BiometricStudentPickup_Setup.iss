@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Biometric Student Pickup System"
-#define MyAppVersion "2.1.0"
+#define MyAppVersion "2.1.1"
 #define MyAppPublisher "Sphere Tech, Inc."
 #define MyAppURL "#"
 #define MyAppExeName "BiometricStudentPickup.exe"
@@ -31,7 +31,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
-OutputBaseFilename=BiometricStudentPickup_Setup
+OutputBaseFilename=BiometricStudentPickup_v2.1.1_Setup
 SolidCompression=yes
 WizardStyle=modern
 
