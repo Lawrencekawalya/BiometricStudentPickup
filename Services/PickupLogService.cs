@@ -66,16 +66,16 @@ namespace BiometricStudentPickup.Services
                 cmd.ExecuteNonQuery();
 
                 // Also log to audit
-                _auditLogService.Log("PICKUP_REQUESTED", 
-                    $"Pickup requested for student ID: {studentId}", 
-                    studentId: studentId, 
+                _auditLogService.Log("PICKUP_REQUESTED",
+                    $"Pickup requested for student ID: {studentId}",
+                    studentId: studentId,
                     guardianId: guardianId);
             }
             catch (Exception ex)
             {
-                _auditLogService.Log("PICKUP_LOG_ERROR", 
-                    $"Failed to log pickup request: {ex.Message}", 
-                    success: false, 
+                _auditLogService.Log("PICKUP_LOG_ERROR",
+                    $"Failed to log pickup request: {ex.Message}",
+                    success: false,
                     errorMessage: ex.Message);
             }
         }
@@ -86,7 +86,7 @@ namespace BiometricStudentPickup.Services
             {
                 var completedAt = DateTime.Now;
                 TimeSpan? duration = null;
-                
+
                 if (requestedAt.HasValue)
                 {
                     duration = completedAt - requestedAt.Value;
@@ -121,17 +121,17 @@ namespace BiometricStudentPickup.Services
                 else
                 {
                     // Log to audit
-                    _auditLogService.Log("PICKUP_COMPLETED", 
-                        $"Pickup completed for student ID: {studentId}", 
-                        studentId: studentId, 
+                    _auditLogService.Log("PICKUP_COMPLETED",
+                        $"Pickup completed for student ID: {studentId}",
+                        studentId: studentId,
                         guardianId: guardianId);
                 }
             }
             catch (Exception ex)
             {
-                _auditLogService.Log("PICKUP_LOG_ERROR", 
-                    $"Failed to log pickup completion: {ex.Message}", 
-                    success: false, 
+                _auditLogService.Log("PICKUP_LOG_ERROR",
+                    $"Failed to log pickup completion: {ex.Message}",
+                    success: false,
                     errorMessage: ex.Message);
             }
         }
@@ -157,15 +157,15 @@ namespace BiometricStudentPickup.Services
                 cmd.ExecuteNonQuery();
 
                 // Log to audit
-                _auditLogService.Log("PICKUP_TIMEOUT", 
-                    $"Pickup timeout for student ID: {studentId}", 
+                _auditLogService.Log("PICKUP_TIMEOUT",
+                    $"Pickup timeout for student ID: {studentId}",
                     studentId: studentId);
             }
             catch (Exception ex)
             {
-                _auditLogService.Log("PICKUP_LOG_ERROR", 
-                    $"Failed to log pickup timeout: {ex.Message}", 
-                    success: false, 
+                _auditLogService.Log("PICKUP_LOG_ERROR",
+                    $"Failed to log pickup timeout: {ex.Message}",
+                    success: false,
                     errorMessage: ex.Message);
             }
         }
@@ -235,7 +235,7 @@ namespace BiometricStudentPickup.Services
             try
             {
                 Debug.WriteLine($"=== GetPickupLogs START ===");
-                
+
                 using var conn = _databaseService.OpenConnection();
                 using var cmd = conn.CreateCommand();
 
@@ -271,18 +271,18 @@ namespace BiometricStudentPickup.Services
                 query += " ORDER BY pl.RequestedAt DESC";
 
                 cmd.CommandText = query;
-                
+
                 Debug.WriteLine($"Executing query: {query}");
 
                 using var reader = cmd.ExecuteReader();
                 int rowCount = 0;
-                
+
                 Debug.WriteLine($"Database columns returned: {reader.FieldCount}");
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
                     Debug.WriteLine($"  Column {i}: {reader.GetName(i)}");
                 }
-                
+
                 while (reader.Read())
                 {
                     rowCount++;
@@ -316,13 +316,13 @@ namespace BiometricStudentPickup.Services
                         {
                             log.Duration = TimeSpan.Parse(reader.GetString(6));
                         }
-                        
+
                         // You could also get the names if you add properties to PickupLog:
                         // if (!reader.IsDBNull(7)) log.StudentName = reader.GetString(7);
                         // if (!reader.IsDBNull(8)) log.GuardianName = reader.GetString(8);
 
                         logs.Add(log);
-                        
+
                         if (rowCount <= 3) // Debug first 3 records
                         {
                             Debug.WriteLine($"  Log [{rowCount}]: Id={log.Id}, StudentId={log.StudentId}, " +
@@ -334,7 +334,7 @@ namespace BiometricStudentPickup.Services
                         Debug.WriteLine($"  ERROR parsing row {rowCount}: {ex.Message}");
                     }
                 }
-                
+
                 Debug.WriteLine($"=== GetPickupLogs END: Loaded {rowCount} records ===");
             }
             catch (Exception ex)
@@ -472,12 +472,12 @@ namespace BiometricStudentPickup.Services
             {
                 using var conn = _databaseService.OpenConnection();
                 using var cmd = conn.CreateCommand();
-                
+
                 cmd.CommandText = "SELECT COUNT(*) FROM PickupLogs";
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
-                
+
                 Debug.WriteLine($"PickupLogService.TestServiceConnection: Table has {count} records");
-                
+
                 if (count > 0)
                 {
                     cmd.CommandText = "SELECT * FROM PickupLogs LIMIT 3";
@@ -512,20 +512,20 @@ namespace BiometricStudentPickup.Services
                     DELETE FROM PickupLogs 
                     WHERE DATE(RequestedAt) < DATE('now', @days)
                 ";
-                
+
                 cmd.Parameters.AddWithValue("@days", $"-{daysToKeep} days");
                 int deleted = cmd.ExecuteNonQuery();
-                
+
                 if (deleted > 0)
                 {
-                    _auditLogService.Log("PICKUP_LOGS_CLEANED", 
+                    _auditLogService.Log("PICKUP_LOGS_CLEANED",
                         $"Cleaned up {deleted} pickup logs older than {daysToKeep} days");
                 }
             }
             catch (Exception ex)
             {
-                _auditLogService.Log("PICKUP_LOG_ERROR", 
-                    "Failed to clean up old pickup logs", 
+                _auditLogService.Log("PICKUP_LOG_ERROR",
+                    "Failed to clean up old pickup logs",
                     success: false, errorMessage: ex.Message);
             }
         }

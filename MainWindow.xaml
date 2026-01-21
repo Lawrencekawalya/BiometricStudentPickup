@@ -94,15 +94,15 @@
                     BorderBrush="#E2E8F0"
                     Effect="{StaticResource CardShadow}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
-                            HorizontalScrollBarVisibility="Disabled">
+                              HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
                         <!-- Current Call Section -->
                         <StackPanel Margin="0,0,0,10">
                             <TextBlock Text="CURRENT PICKUP"
-                                    Foreground="#64748B"
-                                    FontSize="12"
-                                    FontWeight="SemiBold"
-                                    Margin="0,0,0,10"/>
+                                       Foreground="#64748B"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,10"/>
 
                             <Border Background="#F0F9FF"
                                     Padding="2"
@@ -110,22 +110,22 @@
                                     BorderBrush="#BAE6FD">
                                 <StackPanel>
                                     <TextBlock Text="Now Calling"
-                                            FontSize="16"
-                                            Foreground="#0C4A6E"
-                                            FontWeight="Medium"/>
+                                               FontSize="16"
+                                               Foreground="#0C4A6E"
+                                               FontWeight="Medium"/>
 
                                     <TextBlock x:Name="NowCallingName"
-                                            Text="Waiting for next student..."
-                                            FontSize="28"
-                                            FontWeight="Bold"
-                                            Foreground="#0C4A6E"
-                                            Margin="0,5,0,5"/>
+                                               Text="Waiting for next student..."
+                                               FontSize="28"
+                                               FontWeight="Bold"
+                                               Foreground="#0C4A6E"
+                                               Margin="0,5,0,5"/>
 
                                     <TextBlock x:Name="NowCallingClass"
-                                            Text=""
-                                            FontSize="18"
-                                            Foreground="#475569"
-                                            Margin="0,0,0,10"/>
+                                               Text=""
+                                               FontSize="18"
+                                               Foreground="#475569"
+                                               Margin="0,0,0,10"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -133,48 +133,13 @@
                         <!-- Action Buttons -->
                         <StackPanel Margin="0,0,0,20">
                             <TextBlock Text="ACTIONS"
-                                    Foreground="#64748B"
-                                    FontSize="12"
-                                    FontWeight="SemiBold"
-                                    Margin="0,0,0,12"/>
-                            
+                                       Foreground="#64748B"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,12"/>
+
                             <!-- Primary Actions (Main operations) -->
                             <StackPanel Margin="0,0,0,20">
-                                <Button x:Name="ScanGuardianButton"
-                                        Content="🖐️ SCAN GUARDIAN FINGERPRINT"
-                                        Height="52"
-                                        Background="#3B82F6"
-                                        Foreground="White"
-                                        FontWeight="SemiBold"
-                                        FontSize="14"
-                                        BorderThickness="0"
-                                        Margin="0,0,0,12"
-                                        Click="ScanGuardian_Click"
-                                        Cursor="Hand">
-                                    <Button.Effect>
-                                        <DropShadowEffect BlurRadius="12"
-                                                        ShadowDepth="3"
-                                                        Opacity="0.15"/>
-                                    </Button.Effect>
-                                </Button>
-
-                                <Button x:Name="ScanStudentButton"
-                                        Content="👨‍🎓 SCAN STUDENT FINGERPRINT"
-                                        Height="52"
-                                        Background="#10B981"
-                                        Foreground="White"
-                                        FontWeight="SemiBold"
-                                        FontSize="14"
-                                        BorderThickness="0"
-                                        Margin="0,0,0,12"
-                                        Click="ScanStudent_Click"
-                                        Cursor="Hand">
-                                    <Button.Effect>
-                                        <DropShadowEffect BlurRadius="12"
-                                                        ShadowDepth="3"
-                                                        Opacity="0.15"/>
-                                    </Button.Effect>
-                                </Button>
 
                                 <Button x:Name="OpenEnrollmentButton"
                                         Content="🔒 OPEN ENROLLMENT WINDOW"
@@ -190,26 +155,26 @@
                                         ToolTip="Admin PIN required">
                                     <Button.Effect>
                                         <DropShadowEffect BlurRadius="12"
-                                                        ShadowDepth="3"
-                                                        Opacity="0.15"/>
+                                                          ShadowDepth="3"
+                                                          Opacity="0.15"/>
                                     </Button.Effect>
                                 </Button>
                             </StackPanel>
 
                             <!-- Admin Reports Section -->
                             <TextBlock Text="ADMIN REPORTS"
-                                    Foreground="#64748B"
-                                    FontSize="11"
-                                    FontWeight="SemiBold"
-                                    Margin="0,0,0,8"/>
-                            
+                                       Foreground="#64748B"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                
-                                <Button x:Name="ViewAttendanceButton" 
+
+                                <Button x:Name="ViewAttendanceButton"
                                         Grid.Column="0"
                                         Content="📊 ATTENDANCE REPORT"
                                         Height="48"
@@ -224,12 +189,12 @@
                                         ToolTip="View attendance records">
                                     <Button.Effect>
                                         <DropShadowEffect BlurRadius="8"
-                                                        ShadowDepth="2"
-                                                        Opacity="0.1"/>
+                                                          ShadowDepth="2"
+                                                          Opacity="0.1"/>
                                     </Button.Effect>
                                 </Button>
-                                
-                                <Button x:Name="ViewPickupReportButton" 
+
+                                <Button x:Name="ViewPickupReportButton"
                                         Grid.Column="1"
                                         Content="📋 PICKUP REPORT"
                                         Height="48"
@@ -244,15 +209,15 @@
                                         ToolTip="View pickup history and reports">
                                     <Button.Effect>
                                         <DropShadowEffect BlurRadius="8"
-                                                        ShadowDepth="2"
-                                                        Opacity="0.1"/>
+                                                          ShadowDepth="2"
+                                                          Opacity="0.1"/>
                                     </Button.Effect>
                                 </Button>
                             </Grid>
                         </StackPanel>
 
                         <!-- Stats -->
-                        
+
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -277,47 +242,51 @@
                 <!-- USING GRID LAYOUT -->
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Header -->
-                        <RowDefinition Height="*"/>    <!-- List area - fills remaining space -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Header -->
+                        <RowDefinition Height="*"/>
+                        <!-- List area - fills remaining space -->
                     </Grid.RowDefinitions>
-                    
+
                     <!-- Header -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,20">
+                    <DockPanel Grid.Row="0"
+                               Margin="0,0,0,20">
                         <StackPanel DockPanel.Dock="Left">
                             <TextBlock Text="PICKUP QUEUE"
-                                    Foreground="#1E293B"
-                                    FontSize="20"
-                                    FontWeight="Bold"/>
+                                       Foreground="#1E293B"
+                                       FontSize="20"
+                                       FontWeight="Bold"/>
                             <TextBlock Text="Students awaiting pickup"
-                                    Foreground="#64748B"
-                                    FontSize="13"
-                                    Margin="0,3,0,0"/>
+                                       Foreground="#64748B"
+                                       FontSize="13"
+                                       Margin="0,3,0,0"/>
                         </StackPanel>
                         <Border DockPanel.Dock="Right"
                                 Background="#F1F5F9"
                                 Padding="10,6">
                             <TextBlock Text="{Binding QueueService.Queue.Count, StringFormat='\{0\} STUDENTS IN QUEUE'}"
-                                    Foreground="#475569"
-                                    FontWeight="SemiBold"
-                                    FontSize="12"/>
+                                       Foreground="#475569"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"/>
                         </Border>
                     </DockPanel>
-                    
+
                     <!-- List Area -->
                     <Border Grid.Row="1"
                             BorderThickness="1"
                             BorderBrush="#E2E8F0">
 
                         <ListBox x:Name="PickupQueueList"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                             <!-- Hide scrollbar but keep scrolling -->
                             <ListBox.Resources>
                                 <Style TargetType="ScrollBar">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed"/>
                                 </Style>
                             </ListBox.Resources>
 
@@ -342,11 +311,11 @@
                                                     Margin="10"
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding QueueNumber}"
-                                                        Foreground="#475569"
-                                                        FontWeight="Bold"
-                                                        FontSize="14"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
+                                                           Foreground="#475569"
+                                                           FontWeight="Bold"
+                                                           FontSize="14"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
                                             </Border>
 
                                             <!-- Student Info -->
@@ -354,13 +323,13 @@
                                                         VerticalAlignment="Center"
                                                         Margin="8,0">
                                                 <TextBlock Text="{Binding StudentName}"
-                                                        Foreground="#1E293B"
-                                                        FontWeight="SemiBold"
-                                                        FontSize="14"/>
+                                                           Foreground="#1E293B"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="14"/>
                                                 <TextBlock Text="{Binding ClassName}"
-                                                        Foreground="#64748B"
-                                                        FontSize="12"
-                                                        Margin="0,2,0,0"/>
+                                                           Foreground="#64748B"
+                                                           FontSize="12"
+                                                           Margin="0,2,0,0"/>
                                             </StackPanel>
 
                                             <!-- Status Badge -->
@@ -370,9 +339,9 @@
                                                     Margin="0,0,10,0"
                                                     VerticalAlignment="Center">
                                                 <TextBlock Text="WAITING"
-                                                        Foreground="#0EA5E9"
-                                                        FontWeight="SemiBold"
-                                                        FontSize="10"/>
+                                                           Foreground="#0EA5E9"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="10"/>
                                             </Border>
                                         </Grid>
                                     </Border>
@@ -391,8 +360,10 @@
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
-                                    <Setter Property="Padding" Value="0"/>
-                                    <Setter Property="Margin" Value="0,0,0,1"/>
+                                    <Setter Property="Padding"
+                                            Value="0"/>
+                                    <Setter Property="Margin"
+                                            Value="0,0,0,1"/>
                                 </Style>
                             </ListBox.ItemContainerStyle>
 
@@ -415,27 +386,27 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!-- Left: Brand Info -->
                 <StackPanel Grid.Column="0"
                             Orientation="Vertical"
                             VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="🏫"
-                                FontSize="12"
-                                Margin="0,0,6,0"
-                                VerticalAlignment="Center"/>
+                                   FontSize="12"
+                                   Margin="0,0,6,0"
+                                   VerticalAlignment="Center"/>
                         <TextBlock Text="Biometric Student Pickup"
-                                Foreground="#475569"
-                                FontSize="11"
-                                FontWeight="SemiBold"/>
+                                   Foreground="#475569"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"/>
                     </StackPanel>
-                    <TextBlock Text="Secure student dismissal system • v2.1.0 • © 2026"
-                            Foreground="#94A3B8"
-                            FontSize="9"
-                            Margin="0,2,0,0"/>
+                    <TextBlock Text="Secure student pickup system • v2.1.1 • © 2026"
+                               Foreground="#94A3B8"
+                               FontSize="9"
+                               Margin="0,2,0,0"/>
                 </StackPanel>
-                
+
                 <!-- Right: Status Badge -->
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
@@ -454,13 +425,13 @@
                                     VerticalAlignment="Center"/>
                             <StackPanel>
                                 <TextBlock Text="SYNC STATUS"
-                                        Foreground="#0EA5E9"
-                                        FontSize="8"
-                                        FontWeight="Bold"/>
+                                           Foreground="#0EA5E9"
+                                           FontSize="8"
+                                           FontWeight="Bold"/>
                                 <TextBlock Text="Just now"
-                                        Foreground="#1E40AF"
-                                        FontSize="10"
-                                        FontWeight="SemiBold"/>
+                                           Foreground="#1E40AF"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>

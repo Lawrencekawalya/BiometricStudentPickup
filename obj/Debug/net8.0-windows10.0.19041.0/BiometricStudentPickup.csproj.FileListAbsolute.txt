@@ -57,6 +57,7 @@ C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\BiometricStudentPickup.AssemblyInfoInputs.cache
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\BiometricStudentPickup.AssemblyInfo.cs
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\BiometricStudentPickup.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\BiometricStudentPickup.sourcelink.json
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\Biometri.CCB4A6F9.Up2Date
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\BiometricStudentPickup.dll
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Debug\net8.0-windows10.0.19041.0\refint\BiometricStudentPickup.dll

@@ -27,10 +27,10 @@ namespace BiometricStudentPickup
         public QueueService QueueService => _queueService;
 
         private FingerprintService? _fingerprintService;
-
-        private DispatcherTimer? _callTimer;
         private DispatcherTimer? _adminSessionTimer;
         private PickupQueue? _currentPickup;
+        private DispatcherTimer? _scanTimer;
+        private bool _isScanning = false;
 
 
         private const int CALL_TIMEOUT_SECONDS = 15;
@@ -59,9 +59,10 @@ namespace BiometricStudentPickup
             _adminSecurity = new AdminSecurityService(auditLogService);
 
             PickupQueueList.ItemsSource = _queueService.Queue;
-            
 
-            StartCallingLoop();
+
+            // StartCallingLoop();
+            StartContinuousScanning();
 
             Loaded += MainWindow_Loaded;
 
@@ -111,50 +112,334 @@ namespace BiometricStudentPickup
         //     _callTimer.Start();
         // }
         ///////////////////////////////////////////////////////////////////////////
-        private void StartCallingLoop()
+        private void StartContinuousScanning()
         {
-            _callTimer = new DispatcherTimer
+            _scanTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(10)
+                Interval = TimeSpan.FromSeconds(1) // Scan every second
             };
 
-            _callTimer.Tick += (s, e) =>
+            _scanTimer.Tick += async (s, e) => await ContinuousScanAsync();
+            _scanTimer.Start();
+        }
+
+        private async Task ContinuousScanAsync()
+        {
+            // Prevent overlapping scans
+            if (_isScanning || _fingerprintService == null)
+                return;
+
+            _isScanning = true;
+
+            try
             {
-                if (_currentPickup == null)
+                int? fingerprintId = await _fingerprintService.VerifyAsync();
+
+                if (fingerprintId == null)
                 {
-                    _currentPickup = _queueService.GetNext();
-                    if (_currentPickup == null) return;
-
-                    _currentPickup.CalledAt = DateTime.Now;
-                    _currentPickup.Status = "Calling";
-
-                    NowCallingName.Text = _currentPickup.StudentName;
-                    NowCallingClass.Text = _currentPickup.ClassName;
-
-                    _voiceService.Speak(
-                        $"Pickup request for {_currentPickup.StudentName} from {_currentPickup.ClassName}"
-                    );
+                    // No fingerprint detected, just return
                     return;
                 }
 
-                if (_currentPickup.CalledAt.HasValue &&
-                    (DateTime.Now - _currentPickup.CalledAt.Value).TotalSeconds >= CALL_TIMEOUT_SECONDS)
+                // Process the detected fingerprint
+                ProcessScannedFingerprint(fingerprintId.Value);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Scan error: {ex.Message}");
+            }
+            finally
+            {
+                _isScanning = false;
+            }
+        }
+
+        // private async Task ProcessScannedFingerprint(int fingerprintId)
+        private void ProcessScannedFingerprint(int fingerprintId)
+        {
+            Debug.WriteLine($"=== Fingerprint detected: {fingerprintId} ===");
+
+            // 1. Check if it's a Guardian
+            var guardian = _guardianRegistry.FindByFingerprint(fingerprintId);
+            if (guardian != null)
+            {
+                ProcessGuardianScan(guardian);
+                return;
+            }
+
+            // 2. Check if it's a Student
+            var student = _studentRegistry.FindByFingerprint(fingerprintId);
+            if (student != null)
+            {
+                ProcessStudentScan(student);
+                return;
+            }
+
+            // 3. Unknown fingerprint
+            try
+            {
+                _voiceService.Speak("Fingerprint not recognized");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Voice announcement failed: {ex.Message}");
+            }
+            Debug.WriteLine("Fingerprint not found in registry");
+        }
+        ///////////////////////////////////////////////////////////////////////////
+        // private async Task ProcessGuardianScan(Guardian guardian)
+        private void ProcessGuardianScan(Guardian guardian)
+        {
+            Debug.WriteLine($"Guardian scanned: {guardian.FullName}");
+            _voiceService.Speak($"Welcome {guardian.FullName}");
+
+            // Log guardian scan using audit log instead
+            _auditLogService.Log(
+                "GUARDIAN_SCANNED",
+                $"Guardian scanned: {guardian.FullName} (ID: {guardian.LocalId})",
+                guardianId: guardian.LocalId
+            );
+
+            // Get all students associated with this guardian
+            var studentIds = _guardianStudentRegistry.GetStudentsForGuardian(guardian.LocalId);
+
+            int addedCount = 0;
+            foreach (var student in _studentRegistry.All.Where(s => studentIds.Contains(s.LocalId)))
+            {
+                // Check if student is already in queue
+                if (_queueService.Queue.Any(q => q.StudentId == student.LocalId))
                 {
-                    _voiceService.Speak($"{_currentPickup.StudentName} did not respond");
+                    Debug.WriteLine($"Student {student.FullName} is already in queue");
+                    continue;
+                }
 
-                    // Log the timeout event
-                    _pickupLogService.LogPickupTimeout(_currentPickup.StudentId);
+                // Log pickup request
+                _pickupLogService.LogPickupRequest(student.LocalId, guardian.LocalId);
 
-                    _queueService.RequeuePickup(_currentPickup);
+                // Add to queue with guardian ID
+                _queueService.AddPickup(student.LocalId, student.FullName, student.ClassName, guardian.LocalId);
+                addedCount++;
+
+                Debug.WriteLine($"Added {student.FullName} to pickup queue");
+            }
+
+            // Announce result
+            if (addedCount > 0)
+            {
+                _voiceService.Speak($"Added {addedCount} student{(addedCount > 1 ? "s" : "")} to pickup queue");
+
+                // If no student is currently being called, call the first one immediately
+                if (_currentPickup == null)
+                {
+                    CallNextStudentImmediately();
+                }
+            }
+            else
+            {
+                _voiceService.Speak("No students to pickup or all are already in queue");
+            }
+        }
+        // private async Task ProcessStudentScan(Student student)
+        private void ProcessStudentScan(Student student)
+        {
+            Debug.WriteLine($"Student scanned: {student.FullName}");
+
+            // ✅ ATTENDANCE CHECK: Record attendance (only if not already marked today)
+            bool attendanceRecorded = _attendanceService.RecordAttendance(student.LocalId, student.FullName);
+
+            if (attendanceRecorded)
+            {
+                _voiceService.Speak($"Welcome {student.FullName}. Attendance recorded.");
+            }
+            else
+            {
+                _voiceService.Speak($"Welcome back {student.FullName}.");
+            }
+
+            // ✅ Check if student is in queue (Step 3: Remove waiting requirement)
+            var pickupInQueue = _queueService.Queue.FirstOrDefault(q => q.StudentId == student.LocalId);
+
+            if (pickupInQueue != null)
+            {
+                // Complete pickup immediately - no need to wait for "called" status
+                Debug.WriteLine($"Student {student.FullName} is in queue, confirming pickup...");
+
+                // Log successful pickup completion
+                _pickupLogService.LogPickupCompletion(student.LocalId, pickupInQueue.GuardianId);
+
+                // Complete the pickup
+                _queueService.CompletePickup(pickupInQueue);
+                _voiceService.Speak($"Pickup confirmed for {student.FullName}");
+
+                // If this was the currently called student, clear it
+                if (_currentPickup?.StudentId == student.LocalId)
+                {
                     _currentPickup = null;
-
                     NowCallingName.Text = "Waiting for next student...";
                     NowCallingClass.Text = "";
                 }
+
+                // Call next student immediately
+                CallNextStudentImmediately();
+            }
+            else
+            {
+                Debug.WriteLine($"Student {student.FullName} is not in pickup queue");
+
+                // Optional: Ask if guardian is here for pickup
+                // _voiceService.Speak($"{student.FullName}, please ask your guardian to scan");
+            }
+        }
+        // private async Task CallNextStudentImmediately()
+        // {
+        //     if (_currentPickup != null)
+        //     {
+        //         // A student is already being called, don't interrupt
+        //         return;
+        //     }
+
+        //     _currentPickup = _queueService.GetNext();
+        //     if (_currentPickup == null)
+        //     {
+        //         // No students in queue
+        //         NowCallingName.Text = "No students in queue";
+        //         NowCallingClass.Text = "";
+        //         return;
+        //     }
+
+        //     _currentPickup.CalledAt = DateTime.Now;
+        //     _currentPickup.Status = "Calling";
+
+        //     NowCallingName.Text = _currentPickup.StudentName;
+        //     NowCallingClass.Text = _currentPickup.ClassName;
+
+        //     // Announce the call
+        //     _voiceService.Speak(
+        //         $"Pickup request for {_currentPickup.StudentName} from {_currentPickup.ClassName}"
+        //     );
+
+        //     // Start timeout timer for this specific student
+        //     StartStudentTimeoutTimer(_currentPickup);
+        // }
+        /////////////////////////////////////////////////////////////////////////////////////
+        private void CallNextStudentImmediately()
+        {
+            if (_currentPickup != null)
+            {
+                // A student is already being called, don't interrupt
+                return;
+            }
+
+            _currentPickup = _queueService.GetNext();
+            if (_currentPickup == null)
+            {
+                // No students in queue
+                NowCallingName.Text = "No students in queue";
+                NowCallingClass.Text = "";
+                return;
+            }
+
+            _currentPickup.CalledAt = DateTime.Now;
+            _currentPickup.Status = "Calling";
+
+            NowCallingName.Text = _currentPickup.StudentName;
+            NowCallingClass.Text = _currentPickup.ClassName;
+
+            // Announce the call
+            _voiceService.Speak(
+                $"Pickup request for {_currentPickup.StudentName} from {_currentPickup.ClassName}"
+            );
+
+            // Start timeout timer for this specific student
+            StartStudentTimeoutTimer(_currentPickup);
+        }
+        /////////////////////////////////////////////////////////////////////////////////////
+        private void StartStudentTimeoutTimer(PickupQueue pickup)
+        {
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(CALL_TIMEOUT_SECONDS)
             };
 
-            _callTimer.Start();
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+
+                if (_currentPickup?.StudentId == pickup.StudentId && pickup.Status == "Calling")
+                {
+                    // Timeout - student didn't confirm
+                    _voiceService.Speak($"{pickup.StudentName} did not respond");
+
+                    // Log timeout
+                    _pickupLogService.LogPickupTimeout(pickup.StudentId);
+
+                    // Requeue for later
+                    _queueService.RequeuePickup(pickup);
+
+                    if (_currentPickup?.StudentId == pickup.StudentId)
+                    {
+                        _currentPickup = null;
+                    }
+
+                    // Call next student
+                    // Dispatcher.BeginInvoke(new Action(async () =>
+                    // {
+                    //     CallNextStudentImmediately();
+                    // }));
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        CallNextStudentImmediately();
+                    }));
+                }
+            };
+
+            timer.Start();
         }
+        ///////////////////////////////////////////////////////////////////////////
+        // private void StartCallingLoop()
+        // {
+        //     _callTimer = new DispatcherTimer
+        //     {
+        //         Interval = TimeSpan.FromSeconds(10)
+        //     };
+
+        //     _callTimer.Tick += (s, e) =>
+        //     {
+        //         if (_currentPickup == null)
+        //         {
+        //             _currentPickup = _queueService.GetNext();
+        //             if (_currentPickup == null) return;
+
+        //             _currentPickup.CalledAt = DateTime.Now;
+        //             _currentPickup.Status = "Calling";
+
+        //             NowCallingName.Text = _currentPickup.StudentName;
+        //             NowCallingClass.Text = _currentPickup.ClassName;
+
+        //             _voiceService.Speak(
+        //                 $"Pickup request for {_currentPickup.StudentName} from {_currentPickup.ClassName}"
+        //             );
+        //             return;
+        //         }
+
+        //         if (_currentPickup.CalledAt.HasValue &&
+        //             (DateTime.Now - _currentPickup.CalledAt.Value).TotalSeconds >= CALL_TIMEOUT_SECONDS)
+        //         {
+        //             _voiceService.Speak($"{_currentPickup.StudentName} did not respond");
+
+        //             // Log the timeout event
+        //             _pickupLogService.LogPickupTimeout(_currentPickup.StudentId);
+
+        //             _queueService.RequeuePickup(_currentPickup);
+        //             _currentPickup = null;
+
+        //             NowCallingName.Text = "Waiting for next student...";
+        //             NowCallingClass.Text = "";
+        //         }
+        //     };
+
+        //     _callTimer.Start();
+        // }
         ///////////////////////////////////////////////////////////////////////////
 
         // private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -322,7 +607,7 @@ namespace BiometricStudentPickup
             StartAdminSessionMonitor();
             UpdateEnrollmentLockUI();
         }
-///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////
         // private async Task RefreshRegistriesAndDeviceDB()
         // {
         //     try
@@ -331,12 +616,12 @@ namespace BiometricStudentPickup
         //         _studentRegistry.Refresh();
         //         _guardianRegistry.Refresh();
         //         _guardianStudentRegistry.Refresh(); // Add this!
-                
+
         //         // Clear and reload device DB
         //         if (_fingerprintService != null)
         //         {
         //             _fingerprintService.ClearDeviceDatabase();
-                    
+
         //             var allBiometrics = _studentRegistry.All
         //                 .Select(s => new { s.FingerprintId, s.FingerprintTemplate })
         //                 .Concat(
@@ -352,11 +637,11 @@ namespace BiometricStudentPickup
         //                     bio.FingerprintTemplate
         //                 );
         //             }
-                    
+
         //             // Add debug output
         //             Debug.WriteLine($"Refreshed device DB with {allBiometrics.Count} templates");
         //             Debug.WriteLine($"Students: {_studentRegistry.All.Count}, Guardians: {_guardianRegistry.All.Count}");
-                    
+
         //             MessageBox.Show($"Device database refreshed with {allBiometrics.Count} templates.", 
         //                 "Refresh Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         //         }
@@ -372,7 +657,7 @@ namespace BiometricStudentPickup
         //         );
         //     }
         // }
-/////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
         // private async Task RefreshRegistriesAndDeviceDB()
         // {
         //     try
@@ -380,14 +665,14 @@ namespace BiometricStudentPickup
         //         // Refresh registries from database
         //         _studentRegistry.Refresh();
         //         _guardianRegistry.Refresh();
-                
+
         //         // Clear and reload device DB asynchronously
         //         if (_fingerprintService != null)
         //         {
         //             await Task.Run(() =>
         //             {
         //                 _fingerprintService.ClearDeviceDatabase();
-                        
+
         //                 var allBiometrics = _studentRegistry.All
         //                     .Select(s => new { s.FingerprintId, s.FingerprintTemplate })
         //                     .Concat(
@@ -404,7 +689,7 @@ namespace BiometricStudentPickup
         //                     );
         //                 }
         //             });
-                    
+
         //             // MessageBox.Show("Device database refreshed with latest enrollments.", 
         //             //     "Refresh Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         //             MessageBox.Show($"Device database refreshed with {allBiometrics.Count} templates.", 
@@ -421,7 +706,7 @@ namespace BiometricStudentPickup
         //         );
         //     }
         // }
-/////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
         private async Task RefreshRegistriesAndDeviceDB()
         {
             try
@@ -429,34 +714,36 @@ namespace BiometricStudentPickup
                 // Refresh registries from database
                 _studentRegistry.Refresh();
                 _guardianRegistry.Refresh();
-                
+
                 // Get counts before async operation
                 int studentCount = _studentRegistry.All.Count;
                 int guardianCount = _guardianRegistry.All.Count;
                 int totalTemplates = studentCount + guardianCount;
-                
+
                 // Clear and reload device DB asynchronously
                 if (_fingerprintService != null)
                 {
                     int uploadedCount = 0;
-                    
+
                     await Task.Run(() =>
                     {
                         _fingerprintService.ClearDeviceDatabase();
-                        
+
                         var allBiometrics = _studentRegistry.All
-                            .Select(s => new { 
-                                s.FingerprintId, 
+                            .Select(s => new
+                            {
+                                s.FingerprintId,
                                 s.FingerprintTemplate,
                                 Type = "Student",
-                                Name = s.FullName 
+                                Name = s.FullName
                             })
                             .Concat(
-                                _guardianRegistry.All.Select(g => new { 
-                                    g.FingerprintId, 
+                                _guardianRegistry.All.Select(g => new
+                                {
+                                    g.FingerprintId,
                                     g.FingerprintTemplate,
-                                    Type = "Guardian", 
-                                    Name = g.FullName 
+                                    Type = "Guardian",
+                                    Name = g.FullName
                                 })
                             )
                             .OrderBy(x => x.FingerprintId)
@@ -472,15 +759,15 @@ namespace BiometricStudentPickup
                             );
                         }
                     });
-                    
+
                     if (uploadedCount == totalTemplates)
                     {
                         MessageBox.Show($"Device database refreshed successfully!\n\n" +
                                     $"Total templates: {uploadedCount}\n" +
                                     $"Students: {studentCount}\n" +
                                     $"Guardians: {guardianCount}",
-                            "Refresh Complete", 
-                            MessageBoxButton.OK, 
+                            "Refresh Complete",
+                            MessageBoxButton.OK,
                             MessageBoxImage.Information);
                     }
                     else
@@ -488,8 +775,8 @@ namespace BiometricStudentPickup
                         MessageBox.Show($"Warning: Expected {totalTemplates} templates but uploaded {uploadedCount}.\n\n" +
                                     $"Students in registry: {studentCount}\n" +
                                     $"Guardians in registry: {guardianCount}",
-                            "Refresh Issue", 
-                            MessageBoxButton.OK, 
+                            "Refresh Issue",
+                            MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                     }
                 }
@@ -511,7 +798,7 @@ namespace BiometricStudentPickup
                 );
             }
         }
-/////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
         // private async void ScanGuardian_Click(object sender, RoutedEventArgs e)
         // {
         //     _voiceService.Speak("Scanning guardian fingerprint");
@@ -598,45 +885,45 @@ namespace BiometricStudentPickup
 
         //     _voiceService.Speak("Pickup request registered");
         // }
-        private async void ScanGuardian_Click(object sender, RoutedEventArgs e)
-{
-    _voiceService.Speak("Scanning guardian fingerprint");
+        // private async void ScanGuardian_Click(object sender, RoutedEventArgs e)
+        // {
+        //     _voiceService.Speak("Scanning guardian fingerprint");
 
-    if (_fingerprintService == null)
-    {
-        _voiceService.Speak("Fingerprint device not ready");
-        return;
-    }
+        //     if (_fingerprintService == null)
+        //     {
+        //         _voiceService.Speak("Fingerprint device not ready");
+        //         return;
+        //     }
 
-    int? fingerprintId = await _fingerprintService.VerifyAsync();
-    if (fingerprintId == null)
-    {
-        _voiceService.Speak("Guardian not recognized");
-        return;
-    }
+        //     int? fingerprintId = await _fingerprintService.VerifyAsync();
+        //     if (fingerprintId == null)
+        //     {
+        //         _voiceService.Speak("Guardian not recognized");
+        //         return;
+        //     }
 
-    var guardian = _guardianRegistry.FindByFingerprint(fingerprintId.Value);
-    if (guardian == null)
-    {
-        _voiceService.Speak("Guardian not recognized");
-        return;
-    }
+        //     var guardian = _guardianRegistry.FindByFingerprint(fingerprintId.Value);
+        //     if (guardian == null)
+        //     {
+        //         _voiceService.Speak("Guardian not recognized");
+        //         return;
+        //     }
 
-    var studentIds = _guardianStudentRegistry.GetStudentsForGuardian(guardian.LocalId);
+        //     var studentIds = _guardianStudentRegistry.GetStudentsForGuardian(guardian.LocalId);
 
-    foreach (var student in _studentRegistry.All.Where(s => studentIds.Contains(s.LocalId)))
-    {
-        if (_queueService.Queue.Any(q => q.StudentId == student.LocalId))
-            continue;
+        //     foreach (var student in _studentRegistry.All.Where(s => studentIds.Contains(s.LocalId)))
+        //     {
+        //         if (_queueService.Queue.Any(q => q.StudentId == student.LocalId))
+        //             continue;
 
-        // Log the pickup request
-        _pickupLogService.LogPickupRequest(student.LocalId, guardian.LocalId);
-        // Add to queue with guardian ID
-        _queueService.AddPickup(student.LocalId, student.FullName, student.ClassName, guardian.LocalId);
-    }
+        //         // Log the pickup request
+        //         _pickupLogService.LogPickupRequest(student.LocalId, guardian.LocalId);
+        //         // Add to queue with guardian ID
+        //         _queueService.AddPickup(student.LocalId, student.FullName, student.ClassName, guardian.LocalId);
+        //     }
 
-    _voiceService.Speak("Pickup request registered");
-}
+        //     _voiceService.Speak("Pickup request registered");
+        // }
 
         // private async void ScanStudent_Click(object sender, RoutedEventArgs e)
         // {
@@ -714,7 +1001,7 @@ namespace BiometricStudentPickup
         // private async void ScanStudent_Click(object sender, RoutedEventArgs e)
         // {
         //     Debug.WriteLine("=== ScanStudent_Click START ===");
-            
+
         //     _voiceService.Speak("Scanning student fingerprint");
 
         //     if (_fingerprintService == null)
@@ -726,7 +1013,7 @@ namespace BiometricStudentPickup
 
         //     int? fingerprintId = await _fingerprintService.VerifyAsync();
         //     Debug.WriteLine($"Device returned FingerprintId: {fingerprintId}");
-            
+
         //     if (fingerprintId == null)
         //     {
         //         _voiceService.Speak("Student not recognized");
@@ -736,12 +1023,12 @@ namespace BiometricStudentPickup
 
         //     var student = _studentRegistry.FindByFingerprint(fingerprintId.Value);
         //     Debug.WriteLine($"Student found: {student?.FullName ?? "NULL"} (LocalId: {student?.LocalId}, FingerprintId: {student?.FingerprintId})");
-            
+
         //     if (student == null)
         //     {
         //         _voiceService.Speak("Student not recognized");
         //         Debug.WriteLine("Student not found in StudentRegistry");
-                
+
         //         // Debug: List all students in registry
         //         Debug.WriteLine("All students in registry:");
         //         foreach (var s in _studentRegistry.All)
@@ -753,11 +1040,11 @@ namespace BiometricStudentPickup
 
         //     Debug.WriteLine($"Current pickup: {_currentPickup?.StudentName} (StudentId: {_currentPickup?.StudentId})");
         //     Debug.WriteLine($"Comparing: student.LocalId={student.LocalId} vs _currentPickup.StudentId={_currentPickup?.StudentId}");
-            
+
         //     if (_currentPickup == null || _currentPickup.StudentId != student.LocalId)
         //     {
         //         _voiceService.Speak("This student is not being called");
-                
+
         //         // Debug: List all pickups in queue
         //         Debug.WriteLine("All pickups in queue:");
         //         foreach (var pickup in _queueService.Queue)
@@ -774,14 +1061,14 @@ namespace BiometricStudentPickup
         //     _currentPickup = null;
         //     NowCallingName.Text = "Waiting for next student...";
         //     NowCallingClass.Text = "";
-            
+
         //     Debug.WriteLine("=== ScanStudent_Click END ===");
         // }
         ///////////////////////////////////////////////////////////////////////////
         // private async void ScanStudent_Click(object sender, RoutedEventArgs e)
         // {
         //     Debug.WriteLine("=== ScanStudent_Click START ===");
-            
+
         //     _voiceService.Speak("Scanning student fingerprint");
 
         //     if (_fingerprintService == null)
@@ -793,7 +1080,7 @@ namespace BiometricStudentPickup
 
         //     int? fingerprintId = await _fingerprintService.VerifyAsync();
         //     Debug.WriteLine($"Device returned FingerprintId: {fingerprintId}");
-            
+
         //     if (fingerprintId == null)
         //     {
         //         _voiceService.Speak("Student not recognized");
@@ -803,7 +1090,7 @@ namespace BiometricStudentPickup
 
         //     var student = _studentRegistry.FindByFingerprint(fingerprintId.Value);
         //     Debug.WriteLine($"Student found: {student?.FullName ?? "NULL"} (LocalId: {student?.LocalId}, FingerprintId: {student?.FingerprintId})");
-            
+
         //     if (student == null)
         //     {
         //         _voiceService.Speak("Student not recognized");
@@ -813,7 +1100,7 @@ namespace BiometricStudentPickup
 
         //     // ✅ ATTENDANCE CHECK: Record attendance (only if not already marked today)
         //     bool attendanceRecorded = _attendanceService.RecordAttendance(student.LocalId, student.FullName);
-            
+
         //     if (attendanceRecorded)
         //     {
         //         _voiceService.Speak($"Welcome {student.FullName}. Attendance recorded.");
@@ -825,7 +1112,7 @@ namespace BiometricStudentPickup
 
         //     Debug.WriteLine($"Current pickup: {_currentPickup?.StudentName} (StudentId: {_currentPickup?.StudentId})");
         //     Debug.WriteLine($"Comparing: student.LocalId={student.LocalId} vs _currentPickup.StudentId={_currentPickup?.StudentId}");
-            
+
         //     if (_currentPickup == null || _currentPickup.StudentId != student.LocalId)
         //     {
         //         _voiceService.Speak("This student is not being called");
@@ -839,77 +1126,77 @@ namespace BiometricStudentPickup
         //     _currentPickup = null;
         //     NowCallingName.Text = "Waiting for next student...";
         //     NowCallingClass.Text = "";
-            
+
         //     Debug.WriteLine("=== ScanStudent_Click END ===");
         // }
         ////////////////////////////////////////////////////////////////////////////
-        private async void ScanStudent_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine("=== ScanStudent_Click START ===");
-            
-            _voiceService.Speak("Scanning student fingerprint");
+        // private async void ScanStudent_Click(object sender, RoutedEventArgs e)
+        // {
+        //     Debug.WriteLine("=== ScanStudent_Click START ===");
 
-            if (_fingerprintService == null)
-            {
-                _voiceService.Speak("Fingerprint device not ready");
-                Debug.WriteLine("FingerprintService is null");
-                return;
-            }
+        //     _voiceService.Speak("Scanning student fingerprint");
 
-            int? fingerprintId = await _fingerprintService.VerifyAsync();
-            Debug.WriteLine($"Device returned FingerprintId: {fingerprintId}");
-            
-            if (fingerprintId == null)
-            {
-                _voiceService.Speak("Student not recognized");
-                Debug.WriteLine("No fingerprint matched in device database");
-                return;
-            }
+        //     if (_fingerprintService == null)
+        //     {
+        //         _voiceService.Speak("Fingerprint device not ready");
+        //         Debug.WriteLine("FingerprintService is null");
+        //         return;
+        //     }
 
-            var student = _studentRegistry.FindByFingerprint(fingerprintId.Value);
-            Debug.WriteLine($"Student found: {student?.FullName ?? "NULL"} (LocalId: {student?.LocalId}, FingerprintId: {student?.FingerprintId})");
-            
-            if (student == null)
-            {
-                _voiceService.Speak("Student not recognized");
-                Debug.WriteLine("Student not found in StudentRegistry");
-                return;
-            }
+        //     int? fingerprintId = await _fingerprintService.VerifyAsync();
+        //     Debug.WriteLine($"Device returned FingerprintId: {fingerprintId}");
 
-            // ✅ ATTENDANCE CHECK: Record attendance (only if not already marked today)
-            bool attendanceRecorded = _attendanceService.RecordAttendance(student.LocalId, student.FullName);
-            
-            if (attendanceRecorded)
-            {
-                _voiceService.Speak($"Welcome {student.FullName}. Attendance recorded.");
-            }
-            else
-            {
-                _voiceService.Speak($"Welcome back {student.FullName}.");
-            }
+        //     if (fingerprintId == null)
+        //     {
+        //         _voiceService.Speak("Student not recognized");
+        //         Debug.WriteLine("No fingerprint matched in device database");
+        //         return;
+        //     }
 
-            Debug.WriteLine($"Current pickup: {_currentPickup?.StudentName} (StudentId: {_currentPickup?.StudentId})");
-            Debug.WriteLine($"Comparing: student.LocalId={student.LocalId} vs _currentPickup.StudentId={_currentPickup?.StudentId}");
-            
-            if (_currentPickup == null || _currentPickup.StudentId != student.LocalId)
-            {
-                _voiceService.Speak("This student is not being called");
-                return;
-            }
+        //     var student = _studentRegistry.FindByFingerprint(fingerprintId.Value);
+        //     Debug.WriteLine($"Student found: {student?.FullName ?? "NULL"} (LocalId: {student?.LocalId}, FingerprintId: {student?.FingerprintId})");
 
-            // Log successful pickup completion
-            _pickupLogService.LogPickupCompletion(student.LocalId, _currentPickup.GuardianId);
+        //     if (student == null)
+        //     {
+        //         _voiceService.Speak("Student not recognized");
+        //         Debug.WriteLine("Student not found in StudentRegistry");
+        //         return;
+        //     }
 
-            _queueService.CompletePickup(_currentPickup!);
-            _voiceService.Speak($"Pickup confirmed for {_currentPickup.StudentName}");
-            Debug.WriteLine($"Pickup confirmed for {_currentPickup.StudentName}");
+        //     // ✅ ATTENDANCE CHECK: Record attendance (only if not already marked today)
+        //     bool attendanceRecorded = _attendanceService.RecordAttendance(student.LocalId, student.FullName);
 
-            _currentPickup = null;
-            NowCallingName.Text = "Waiting for next student...";
-            NowCallingClass.Text = "";
-            
-            Debug.WriteLine("=== ScanStudent_Click END ===");
-        }
+        //     if (attendanceRecorded)
+        //     {
+        //         _voiceService.Speak($"Welcome {student.FullName}. Attendance recorded.");
+        //     }
+        //     else
+        //     {
+        //         _voiceService.Speak($"Welcome back {student.FullName}.");
+        //     }
+
+        //     Debug.WriteLine($"Current pickup: {_currentPickup?.StudentName} (StudentId: {_currentPickup?.StudentId})");
+        //     Debug.WriteLine($"Comparing: student.LocalId={student.LocalId} vs _currentPickup.StudentId={_currentPickup?.StudentId}");
+
+        //     if (_currentPickup == null || _currentPickup.StudentId != student.LocalId)
+        //     {
+        //         _voiceService.Speak("This student is not being called");
+        //         return;
+        //     }
+
+        //     // Log successful pickup completion
+        //     _pickupLogService.LogPickupCompletion(student.LocalId, _currentPickup.GuardianId);
+
+        //     _queueService.CompletePickup(_currentPickup!);
+        //     _voiceService.Speak($"Pickup confirmed for {_currentPickup.StudentName}");
+        //     Debug.WriteLine($"Pickup confirmed for {_currentPickup.StudentName}");
+
+        //     _currentPickup = null;
+        //     NowCallingName.Text = "Waiting for next student...";
+        //     NowCallingClass.Text = "";
+
+        //     Debug.WriteLine("=== ScanStudent_Click END ===");
+        // }
         ////////////////////////////////////////////////////////////////////////////
 
         private void StartAdminSessionMonitor()
@@ -1061,7 +1348,7 @@ namespace BiometricStudentPickup
             {
                 _adminSecurity.ClearSession();
                 UpdateEnrollmentLockUI();
-                
+
                 // IMPORTANT: Refresh registries and device database
                 await RefreshRegistriesAndDeviceDB();
             };
@@ -1075,19 +1362,19 @@ namespace BiometricStudentPickup
         //     {
         //         var pinDialog = new PinDialog { Owner = this };
         //         if (pinDialog.ShowDialog() != true) return;
-                
+
         //         if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
         //         {
         //             MessageBox.Show(error, "Access denied", MessageBoxButton.OK, MessageBoxImage.Warning);
         //             return;
         //         }
         //     }
-            
+
         //     var attendanceWindow = new AttendanceReportWindow(_attendanceService, _studentRegistry)
         //     {
         //         Owner = this
         //     };
-            
+
         //     attendanceWindow.ShowDialog();
         // }
         private void ViewAttendanceButton_Click(object sender, RoutedEventArgs e)
@@ -1096,26 +1383,26 @@ namespace BiometricStudentPickup
             {
                 var pinDialog = new PinDialog { Owner = this };
                 if (pinDialog.ShowDialog() != true) return;
-                
+
                 if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
                 {
                     MessageBox.Show(error, "Access denied", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
-            
+
             var attendanceWindow = new AttendanceReportWindow(_attendanceService, _studentRegistry)
             {
                 Owner = this
             };
-            
+
             // Clear admin session when attendance window closes
             attendanceWindow.Closed += (s, args) =>
             {
                 _adminSecurity.ClearSession();
                 UpdateEnrollmentLockUI();
             };
-            
+
             attendanceWindow.ShowDialog();
         }
 
@@ -1126,7 +1413,7 @@ namespace BiometricStudentPickup
         //     {
         //         var pinDialog = new PinDialog { Owner = this };
         //         if (pinDialog.ShowDialog() != true) return;
-                
+
         //         if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
         //         {
         //             MessageBox.Show(error, "Access denied", 
@@ -1134,7 +1421,7 @@ namespace BiometricStudentPickup
         //             return;
         //         }
         //     }
-            
+
         //     // Open the pickup report window
         //     var pickupReportWindow = new PickupReportWindow(
         //         _pickupLogService,
@@ -1143,7 +1430,7 @@ namespace BiometricStudentPickup
         //     {
         //         Owner = this
         //     };
-            
+
         //     pickupReportWindow.ShowDialog();
         // }
         // private void ViewPickupReportButton_Click(object sender, RoutedEventArgs e)
@@ -1151,7 +1438,7 @@ namespace BiometricStudentPickup
         //     try
         //     {
         //         Debug.WriteLine("=== ViewPickupReportButton_Click START ===");
-                
+
         //         // Check for admin authentication
         //         if (!_adminSecurity.IsAdminSessionActive())
         //         {
@@ -1162,7 +1449,7 @@ namespace BiometricStudentPickup
         //                 Debug.WriteLine("PIN dialog cancelled");
         //                 return;
         //             }
-                    
+
         //             if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
         //             {
         //                 Debug.WriteLine($"PIN verification failed: {error}");
@@ -1172,9 +1459,9 @@ namespace BiometricStudentPickup
         //             }
         //             Debug.WriteLine("PIN verified successfully");
         //         }
-                
+
         //         Debug.WriteLine("Opening PickupReportWindow");
-                
+
         //         // Open the pickup report window
         //         var pickupReportWindow = new PickupReportWindow(
         //             _pickupLogService,
@@ -1183,7 +1470,7 @@ namespace BiometricStudentPickup
         //         {
         //             Owner = this
         //         };
-                
+
         //         Debug.WriteLine("PickupReportWindow created, showing dialog");
         //         pickupReportWindow.ShowDialog();
         //         Debug.WriteLine("PickupReportWindow closed");
@@ -1192,7 +1479,7 @@ namespace BiometricStudentPickup
         //     {
         //         Debug.WriteLine($"CRASH in ViewPickupReportButton_Click: {ex.Message}");
         //         Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                
+
         //         MessageBox.Show($"Failed to open pickup report:\n\n{ex.Message}", 
         //             "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         //     }
@@ -1207,15 +1494,15 @@ namespace BiometricStudentPickup
             {
                 var pinDialog = new PinDialog { Owner = this };
                 if (pinDialog.ShowDialog() != true) return;
-                
+
                 if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
                 {
-                    MessageBox.Show(error, "Access denied", 
+                    MessageBox.Show(error, "Access denied",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
-            
+
             var pickupReportWindow = new PickupReportWindow(
                 _pickupLogService,
                 _studentRegistry,
@@ -1223,14 +1510,14 @@ namespace BiometricStudentPickup
             {
                 Owner = this
             };
-            
+
             // Clear admin session when pickup report window closes
             pickupReportWindow.Closed += (s, args) =>
             {
                 _adminSecurity.ClearSession();
                 UpdateEnrollmentLockUI();
             };
-            
+
             pickupReportWindow.ShowDialog();
         }
 
@@ -1240,16 +1527,16 @@ namespace BiometricStudentPickup
         protected override void OnClosed(EventArgs e)
         {
             // Stop timers
-            _callTimer?.Stop();
             _adminSessionTimer?.Stop();
-            
+            _scanTimer?.Stop();
+
             // Dispose fingerprint service
             if (_fingerprintService != null)
             {
                 _fingerprintService.Dispose();
                 _fingerprintService = null;
             }
-            
+
             base.OnClosed(e);
         }
 
