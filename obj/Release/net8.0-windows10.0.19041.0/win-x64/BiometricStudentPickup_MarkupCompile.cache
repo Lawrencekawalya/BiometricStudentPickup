@@ -1,0 +1,20 @@
+﻿BiometricStudentPickup
+
+
+winexe
+C#
+.cs
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\
+BiometricStudentPickup
+none
+false
+TRACE;RELEASE;NET;NET8_0;NETCOREAPP
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\App.xaml
+6-848904766
+
+291072144171
+2151286012941
+AttendanceReportWindow.xaml;EnrollmentWindow.xaml;MainWindow.xaml;PickupReportWindow.xaml;Views\CreatePinDialog.xaml;Views\PinDialog.xaml;
+
+False
+

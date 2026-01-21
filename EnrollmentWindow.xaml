@@ -1,0 +1,264 @@
+<Window x:Class="BiometricStudentPickup.EnrollmentWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+        Title="Fingerprint Enrollment"
+        Height="650"
+        Width="550"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F9FAFB">
+
+    <Border Padding="30"
+            Background="White"
+            Margin="20">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      Padding="5">
+            <StackPanel>
+
+                <!-- Header -->
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Text="👤 Fingerprint Enrollment"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="#111827"/>
+                    <TextBlock Text="Register students and their guardians for biometric pickup"
+                               FontSize="14"
+                               Foreground="#6B7280"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- Student Enrollment Section -->
+                <Border Background="#F0F9FF"
+                        Padding="20"
+                        BorderThickness="1"
+                        BorderBrush="#E0F2FE"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Student Enrollment"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#0369A1"/>
+                            <Rectangle Height="2"
+                                       Fill="#0369A1"
+                                       Margin="0,4,0,0"
+                                       HorizontalAlignment="Left"
+                                       Width="120"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="Full Name"
+                                           FontWeight="Medium"
+                                           Foreground="#374151"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="StudentNameTextBox"
+                                         Padding="8"
+                                         FontSize="14"
+                                         Background="White"
+                                         BorderBrush="#D1D5DB"
+                                         BorderThickness="1"
+                                         Height="38"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,8,0,12">
+                                <TextBlock Text="Class/Grade"
+                                           FontWeight="Medium"
+                                           Foreground="#374151"
+                                           Margin="0,0,0,4"/>
+                                <TextBox x:Name="StudentClassTextBox"
+                                         Padding="8"
+                                         FontSize="14"
+                                         Background="White"
+                                         BorderBrush="#D1D5DB"
+                                         BorderThickness="1"
+                                         Height="38"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Button x:Name="EnrollStudentButton"
+                                Content="🖐️ Enroll Student Fingerprint"
+                                Height="42"
+                                Background="#0EA5E9"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                FontSize="14"
+                                BorderThickness="0"
+                                Margin="0,8,0,0"
+                                IsEnabled="True"
+                                Click="EnrollStudent_Click">
+                            <Button.Effect>
+                                <DropShadowEffect BlurRadius="8"
+                                                  ShadowDepth="2"
+                                                  Opacity="0.1"/>
+                            </Button.Effect>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Guardian Enrollment Section -->
+                <Border Background="#FEF2F2"
+                        Padding="20"
+                        BorderThickness="1"
+                        BorderBrush="#FEE2E2"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Guardian Enrollment"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="#DC2626"/>
+                            <Rectangle Height="2"
+                                       Fill="#DC2626"
+                                       Margin="0,4,0,0"
+                                       HorizontalAlignment="Left"
+                                       Width="130"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Guardian Name"
+                                       FontWeight="Medium"
+                                       Foreground="#374151"
+                                       Margin="0,0,0,4"/>
+                            <TextBox x:Name="GuardianNameTextBox"
+                                     Padding="8"
+                                     FontSize="14"
+                                     Background="White"
+                                     BorderBrush="#D1D5DB"
+                                     BorderThickness="1"
+                                     Height="38"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Associated Students"
+                                       FontWeight="Medium"
+                                       Foreground="#374151"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="Select all students this guardian is authorized to pick up:"
+                                       FontSize="13"
+                                       Foreground="#6B7280"
+                                       Margin="0,0,0,8"/>
+
+                            <!-- Search box -->
+                            <TextBox x:Name="StudentSearchBox"
+                                    Height="36"
+                                    Margin="0,0,0,8"
+                                    Padding="10,6"
+                                    FontSize="14"
+                                    TextChanged="StudentSearchBox_TextChanged"/>
+
+                            <Border BorderThickness="1"
+                                    BorderBrush="#D1D5DB"
+                                    Background="White"
+                                    Height="150"
+                                    Margin="0,8,0,0">
+                                <ListBox x:Name="StudentMultiSelect"
+                                         SelectionMode="Multiple"
+                                         DisplayMemberPath="FullName"
+                                         BorderThickness="0"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border Background="Transparent"
+                                                                Padding="8">
+                                                            <CheckBox IsChecked="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsSelected}"
+                                                                      Content="{Binding FullName}"
+                                                                      VerticalContentAlignment="Center"
+                                                                      FontSize="14">
+                                                                <CheckBox.Resources>
+                                                                    <Style TargetType="CheckBox">
+                                                                        <Setter Property="Template">
+                                                                            <Setter.Value>
+                                                                                <ControlTemplate TargetType="CheckBox">
+                                                                                    <StackPanel Orientation="Horizontal"
+                                                                                                VerticalAlignment="Center">
+                                                                                        <Border x:Name="checkBoxBorder"
+                                                                                                Width="16"
+                                                                                                Height="16"
+                                                                                                Background="White"
+                                                                                                BorderBrush="#9CA3AF"
+                                                                                                BorderThickness="1"
+                                                                                                Margin="0,0,8,0">
+                                                                                            <TextBlock x:Name="checkMark"
+                                                                                                       Text="✓"
+                                                                                                       Foreground="White"
+                                                                                                       HorizontalAlignment="Center"
+                                                                                                       VerticalAlignment="Center"
+                                                                                                       FontSize="10"
+                                                                                                       Visibility="Hidden"/>
+                                                                                        </Border>
+                                                                                        <ContentPresenter VerticalAlignment="Center"/>
+                                                                                    </StackPanel>
+                                                                                    <ControlTemplate.Triggers>
+                                                                                        <Trigger Property="IsChecked"
+                                                                                                 Value="True">
+                                                                                            <Setter TargetName="checkBoxBorder"
+                                                                                                    Property="Background"
+                                                                                                    Value="#0EA5E9"/>
+                                                                                            <Setter TargetName="checkBoxBorder"
+                                                                                                    Property="BorderBrush"
+                                                                                                    Value="#0EA5E9"/>
+                                                                                            <Setter TargetName="checkMark"
+                                                                                                    Property="Visibility"
+                                                                                                    Value="Visible"/>
+                                                                                        </Trigger>
+                                                                                    </ControlTemplate.Triggers>
+                                                                                </ControlTemplate>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </CheckBox.Resources>
+                                                            </CheckBox>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
+                            </Border>
+                        </StackPanel>
+
+                        <Button x:Name="EnrollGuardianButton"
+                                Content="🖐️ Enroll Guardian Fingerprint"
+                                Height="42"
+                                Background="#EF4444"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                FontSize="14"
+                                BorderThickness="0"
+                                Margin="0,8,0,0"
+                                IsEnabled="True"
+                                Click="EnrollGuardian_Click">
+                            <Button.Effect>
+                                <DropShadowEffect BlurRadius="8"
+                                                  ShadowDepth="2"
+                                                  Opacity="0.1"/>
+                            </Button.Effect>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status/Instructions -->
+                <Border Background="#F3F4F6"
+                        Padding="15">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="💡"
+                                   FontSize="16"
+                                   VerticalAlignment="Top"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock Text="Place finger on scanner when prompted. Ensure finger is clean and dry for best results."
+                                   FontSize="13"
+                                   Foreground="#4B5563"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>

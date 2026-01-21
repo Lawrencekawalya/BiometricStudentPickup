@@ -1,0 +1,437 @@
+// using System;
+// using System.Linq;
+// using System.Windows;
+
+// using BiometricStudentPickup.Services;
+// using BiometricStudentPickup.Models;
+
+// namespace BiometricStudentPickup
+// {
+//     public partial class EnrollmentWindow : Window
+//     {
+//         private readonly StudentRegistry _studentRegistry;
+//         private readonly GuardianRegistry _guardianRegistry;
+//         private readonly GuardianStudentRegistry _guardianStudentRegistry;
+//         private readonly FingerprintService _fingerprintService;
+
+//         public EnrollmentWindow(
+//             StudentRegistry studentRegistry,
+//             GuardianRegistry guardianRegistry,
+//             GuardianStudentRegistry guardianStudentRegistry,
+//             FingerprintService fingerprintService)
+//         {
+//             InitializeComponent();
+
+//             _studentRegistry = studentRegistry;
+//             _guardianRegistry = guardianRegistry;
+//             _guardianStudentRegistry = guardianStudentRegistry;
+//             _fingerprintService = fingerprintService;
+
+//             StudentMultiSelect.ItemsSource = _studentRegistry.All;
+//         }
+
+//         // private async void EnrollStudent_Click(object sender, RoutedEventArgs e)
+//         // {
+//         //     var name = StudentNameTextBox.Text.Trim();
+//         //     var cls = StudentClassTextBox.Text.Trim();
+
+//         //     if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(cls))
+//         //     {
+//         //         MessageBox.Show("Enter student name and class");
+//         //         return;
+//         //     }
+
+//         //     int fingerprintId = await _fingerprintService.EnrollAndReturnFingerprintIdAsync();
+//         //     _studentRegistry.Add(name, cls, fingerprintId);
+
+//         //     StudentMultiSelect.ItemsSource = null;
+//         //     StudentMultiSelect.ItemsSource = _studentRegistry.All;
+
+//         //     MessageBox.Show("Student enrolled");
+//         // }
+
+//         // private async void EnrollStudent_Click(object sender, RoutedEventArgs e)
+//         // {
+//         //     try
+//         //     {
+//         //         var name = StudentNameTextBox.Text.Trim();
+//         //         var cls = StudentClassTextBox.Text.Trim();
+
+//         //         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(cls))
+//         //         {
+//         //             MessageBox.Show("Enter student name and class");
+//         //             return;
+//         //         }
+
+//         //         int fingerprintId =
+//         //             await _fingerprintService.EnrollAndReturnFingerprintIdAsync();
+
+//         //         // 🔒 PREVENT DUPLICATE FINGERPRINT ENROLLMENT
+//         //         if (_studentRegistry.FindByFingerprint(fingerprintId) != null)
+//         //         {
+//         //             MessageBox.Show(
+//         //                 "This fingerprint is already enrolled to another student.",
+//         //                 "Duplicate fingerprint",
+//         //                 MessageBoxButton.OK,
+//         //                 MessageBoxImage.Warning
+//         //             );
+//         //             return;
+//         //         }
+
+//         //         var student = _studentRegistry.Add(name, cls, fingerprintId, template);
+
+//         //         StudentMultiSelect.ItemsSource = null;
+//         //         StudentMultiSelect.ItemsSource = _studentRegistry.All;
+
+//         //         MessageBox.Show($"Student enrolled: {student.FullName}");
+//         //     }
+//         //     catch (Exception ex)
+//         //     {
+//         //         MessageBox.Show(
+//         //             $"Student enrollment failed:\n{ex.Message}",
+//         //             "Enrollment error",
+//         //             MessageBoxButton.OK,
+//         //             MessageBoxImage.Error
+//         //         );
+//         //     }
+//         // }
+
+//         private async void EnrollStudent_Click(object sender, RoutedEventArgs e)
+//         {
+//             try
+//             {
+//                 var name = StudentNameTextBox.Text.Trim();
+//                 var cls = StudentClassTextBox.Text.Trim();
+
+//                 if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(cls))
+//                 {
+//                     MessageBox.Show("Enter student name and class");
+//                     return;
+//                 }
+
+//                 // SDK returns ONLY the template
+//                 byte[] template = await _fingerprintService.EnrollAsync();
+
+//                 // Check duplicate template (by hash or by match later)
+//                 if (_studentRegistry.FindByTemplate(template) != null)
+//                 {
+//                     MessageBox.Show(
+//                         "This fingerprint is already enrolled to another student.",
+//                         "Duplicate fingerprint",
+//                         MessageBoxButton.OK,
+//                         MessageBoxImage.Warning
+//                     );
+//                     return;
+//                 }
+
+//                 var student = _studentRegistry.Add(name, cls, template);
+
+//                 StudentMultiSelect.ItemsSource = null;
+//                 StudentMultiSelect.ItemsSource = _studentRegistry.All;
+
+//                 MessageBox.Show($"Student enrolled: {student.FullName}");
+//             }
+//             catch (Exception ex)
+//             {
+//                 MessageBox.Show(
+//                     $"Student enrollment failed:\n{ex.Message}",
+//                     "Enrollment error",
+//                     MessageBoxButton.OK,
+//                     MessageBoxImage.Error
+//                 );
+//             }
+//         }
+
+//         // private async void EnrollGuardian_Click(object sender, RoutedEventArgs e)
+//         // {
+//         //     var name = GuardianNameTextBox.Text.Trim();
+//         //     var selectedStudents = StudentMultiSelect.SelectedItems
+//         //         .Cast<Student>()
+//         //         .Select(s => s.LocalId)
+//         //         .ToList();
+
+//         //     if (!selectedStudents.Any())
+//         //     {
+//         //         MessageBox.Show("Select students");
+//         //         return;
+//         //     }
+
+//         //     int fingerprintId = await _fingerprintService.EnrollAndReturnFingerprintIdAsync();
+//         //     var guardian = _guardianRegistry.Add(name, fingerprintId);
+
+//         //     _guardianStudentRegistry.Link(guardian.LocalId, selectedStudents);
+
+//         //     MessageBox.Show("Guardian enrolled");
+//         // }
+
+//         // private async void EnrollGuardian_Click(object sender, RoutedEventArgs e)
+//         // {
+//         //     try
+//         //     {
+//         //         var name = GuardianNameTextBox.Text.Trim();
+
+//         //         var selectedStudents = StudentMultiSelect.SelectedItems
+//         //             .Cast<Student>()
+//         //             .Select(s => s.LocalId)
+//         //             .ToList();
+
+//         //         if (string.IsNullOrWhiteSpace(name))
+//         //         {
+//         //             MessageBox.Show("Enter guardian name");
+//         //             return;
+//         //         }
+
+//         //         if (!selectedStudents.Any())
+//         //         {
+//         //             MessageBox.Show("Select students");
+//         //             return;
+//         //         }
+
+//         //         int fingerprintId =
+//         //             await _fingerprintService.EnrollAndReturnFingerprintIdAsync();
+                
+//         //         if (_guardianRegistry.FindByFingerprint(fingerprintId) != null)
+//         //         {
+//         //             MessageBox.Show(
+//         //                 "This fingerprint is already enrolled to another guardian.",
+//         //                 "Duplicate fingerprint",
+//         //                 MessageBoxButton.OK,
+//         //                 MessageBoxImage.Warning
+//         //             );
+//         //             return;
+//         //         }
+
+//         //         var guardian = _guardianRegistry.Add(name, cls, fingerprintId, template);
+
+
+//         //         _guardianStudentRegistry.Link(guardian.LocalId, selectedStudents);
+
+//         //         MessageBox.Show($"Guardian enrolled: {guardian.FullName}");
+//         //     }
+//         //     catch (Exception ex)
+//         //     {
+//         //         MessageBox.Show(
+//         //             $"Guardian enrollment failed:\n{ex.Message}",
+//         //             "Enrollment error",
+//         //             MessageBoxButton.OK,
+//         //             MessageBoxImage.Error
+//         //         );
+//         //     }
+//         // }
+
+//         private async void EnrollGuardian_Click(object sender, RoutedEventArgs e)
+//         {
+//             try
+//             {
+//                 var name = GuardianNameTextBox.Text.Trim();
+
+//                 var selectedStudents = StudentMultiSelect.SelectedItems
+//                     .Cast<Student>()
+//                     .Select(s => s.LocalId)
+//                     .ToList();
+
+//                 if (string.IsNullOrWhiteSpace(name))
+//                 {
+//                     MessageBox.Show("Enter guardian name");
+//                     return;
+//                 }
+
+//                 if (!selectedStudents.Any())
+//                 {
+//                     MessageBox.Show("Select students");
+//                     return;
+//                 }
+
+//                 byte[] template = await _fingerprintService.EnrollAsync();
+
+//                 if (_guardianRegistry.FindByTemplate(template) != null)
+//                 {
+//                     MessageBox.Show(
+//                         "This fingerprint is already enrolled to another guardian.",
+//                         "Duplicate fingerprint",
+//                         MessageBoxButton.OK,
+//                         MessageBoxImage.Warning
+//                     );
+//                     return;
+//                 }
+
+//                 var guardian = _guardianRegistry.Add(name, template);
+
+//                 _guardianStudentRegistry.Link(guardian.LocalId, selectedStudents);
+
+//                 MessageBox.Show($"Guardian enrolled: {guardian.FullName}");
+//             }
+//             catch (Exception ex)
+//             {
+//                 MessageBox.Show(
+//                     $"Guardian enrollment failed:\n{ex.Message}",
+//                     "Enrollment error",
+//                     MessageBoxButton.OK,
+//                     MessageBoxImage.Error
+//                 );
+//             }
+//         }
+
+
+
+//     }
+// }
+
+
+using System;
+using System.Linq;
+using System.Windows;
+
+using BiometricStudentPickup.Services;
+using BiometricStudentPickup.Models;
+
+namespace BiometricStudentPickup
+{
+    public partial class EnrollmentWindow : Window
+    {
+        private readonly StudentRegistry _studentRegistry;
+        private readonly GuardianRegistry _guardianRegistry;
+        private readonly GuardianStudentRegistry _guardianStudentRegistry;
+        private readonly FingerprintService _fingerprintService;
+        private readonly DatabaseService _database;
+
+        public EnrollmentWindow(
+            StudentRegistry studentRegistry,
+            GuardianRegistry guardianRegistry,
+            GuardianStudentRegistry guardianStudentRegistry,
+            FingerprintService fingerprintService,
+            DatabaseService database)
+        {
+            InitializeComponent();
+
+            _studentRegistry = studentRegistry;
+            _guardianRegistry = guardianRegistry;
+            _guardianStudentRegistry = guardianStudentRegistry;
+            _fingerprintService = fingerprintService;
+            _database = database;
+
+            StudentMultiSelect.ItemsSource = _studentRegistry.All;
+        }
+
+        // ============================
+        // STUDENT ENROLLMENT
+        // ============================
+        private async void EnrollStudent_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var name = StudentNameTextBox.Text.Trim();
+                var cls = StudentClassTextBox.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(cls))
+                {
+                    MessageBox.Show("Enter student name and class");
+                    return;
+                }
+
+                // 1️⃣ Capture fingerprint template
+                byte[] template = await _fingerprintService.EnrollAsync();
+
+                // 2️⃣ Check for duplicate fingerprint in device DB
+                int? existingId = await _fingerprintService.VerifyAsync();
+                if (existingId != null)
+                {
+                    MessageBox.Show(
+                        "This fingerprint is already enrolled.",
+                        "Duplicate fingerprint",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    return;
+                }
+
+                // 3️⃣ Generate GLOBAL fingerprint ID
+                int fingerprintId = _database.GetNextFingerprintId();
+
+                // 4️⃣ Persist in SQLite
+                var student = _studentRegistry.Add(
+                    name,
+                    cls,
+                    fingerprintId,
+                    template
+                );
+
+                // 5️⃣ Upload to device
+                _fingerprintService.UploadTemplate(fingerprintId, template);
+
+                StudentMultiSelect.ItemsSource = null;
+                StudentMultiSelect.ItemsSource = _studentRegistry.All;
+
+                MessageBox.Show($"Student enrolled: {student.FullName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Student enrollment failed:\n{ex.Message}",
+                    "Enrollment error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+
+
+        // ============================
+        // GUARDIAN ENROLLMENT
+        // ============================
+        private async void EnrollGuardian_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var name = GuardianNameTextBox.Text.Trim();
+
+                var selectedStudents = StudentMultiSelect.SelectedItems
+                    .Cast<Student>()
+                    .Select(s => s.LocalId)
+                    .ToList();
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    MessageBox.Show("Enter guardian name");
+                    return;
+                }
+
+                if (!selectedStudents.Any())
+                {
+                    MessageBox.Show("Select at least one student");
+                    return;
+                }
+
+                // 1️⃣ Capture fingerprint template
+                byte[] template = await _fingerprintService.EnrollAsync();
+
+                // 2️⃣ Generate GLOBAL fingerprint ID
+                int fingerprintId = _database.GetNextFingerprintId();
+
+                // 3️⃣ Persist guardian
+                var guardian = _guardianRegistry.Add(
+                    name,
+                    fingerprintId,
+                    template
+                );
+
+                // 4️⃣ Upload to device immediately
+                _fingerprintService.UploadTemplate(fingerprintId, template);
+
+                // 5️⃣ Link guardian to students
+                _guardianStudentRegistry.Link(guardian.LocalId, selectedStudents);
+
+                MessageBox.Show($"Guardian enrolled: {guardian.FullName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Guardian enrollment failed:\n{ex.Message}",
+                    "Enrollment error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+    }
+}
