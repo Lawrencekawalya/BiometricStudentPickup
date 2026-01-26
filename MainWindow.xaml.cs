@@ -1406,6 +1406,47 @@ namespace BiometricStudentPickup
             attendanceWindow.ShowDialog();
         }
 
+        private void OpenStudentManagementButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Check if admin session is already active
+            if (!_adminSecurity.IsAdminSessionActive())
+            {
+                var pinDialog = new PinDialog { Owner = this };
+
+                if (pinDialog.ShowDialog() != true)
+                    return;
+
+                if (!_adminSecurity.VerifyPin(pinDialog.EnteredPin, out var error))
+                {
+                    MessageBox.Show(
+                        error,
+                        "Access denied",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    return;
+                }
+            }
+
+            // 2. Open Student Management window
+            var window = new StudentManagementWindow
+            {
+                Owner = this
+            };
+
+            // 3. Clear admin session when window closes (same pattern as attendance)
+            window.Closed += (s, args) =>
+            {
+                _adminSecurity.ClearSession();
+                UpdateEnrollmentLockUI();
+            };
+
+            window.ShowDialog();
+        }
+
+
+
+
         // private void ViewPickupReportButton_Click(object sender, RoutedEventArgs e)
         // {
         //     // Check for admin authentication
