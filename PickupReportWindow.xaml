@@ -13,640 +13,619 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
-        <converters:StatusToTextConverter x:Key="EventTypeToColorConverter"/>
+        <Window.Resources>
+                <converters:StatusToTextConverter x:Key="EventTypeToColorConverter"/>
 
-        <!-- Custom Styles Matching Attendance Report -->
-        <Style x:Key="PrimaryButtonStyle"
-               TargetType="Button">
-            <Setter Property="materialDesign:ButtonAssist.CornerRadius"
-                    Value="6"/>
-            <Setter Property="Height"
-                    Value="36"/>
-            <Setter Property="FontSize"
-                    Value="13"/>
-            <Setter Property="FontWeight"
-                    Value="SemiBold"/>
-            <Setter Property="Cursor"
-                    Value="Hand"/>
-            <Setter Property="Padding"
-                    Value="16,6"/>
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Center"/>
-        </Style>
+                <!-- Custom Styles Matching Attendance Report -->
+                <Style x:Key="PrimaryButtonStyle"
+                       TargetType="Button">
+                        <Setter Property="materialDesign:ButtonAssist.CornerRadius"
+                                Value="6"/>
+                        <Setter Property="Height"
+                                Value="36"/>
+                        <Setter Property="FontSize"
+                                Value="13"/>
+                        <Setter Property="FontWeight"
+                                Value="SemiBold"/>
+                        <Setter Property="Cursor"
+                                Value="Hand"/>
+                        <Setter Property="Padding"
+                                Value="16,6"/>
+                        <Setter Property="HorizontalContentAlignment"
+                                Value="Center"/>
+                </Style>
 
-        <Style x:Key="FilterButtonStyle"
-               BasedOn="{StaticResource PrimaryButtonStyle}"
-               TargetType="Button">
-            <Setter Property="Background"
-                    Value="{DynamicResource PrimaryHueLightBrush}"/>
-            <Setter Property="Foreground"
-                    Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-            <Setter Property="BorderThickness"
-                    Value="1"/>
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource PrimaryHueMidBrush}"/>
-        </Style>
-
-        <Style x:Key="ExportButtonStyle"
-               BasedOn="{StaticResource PrimaryButtonStyle}"
-               TargetType="Button">
-            <Setter Property="Background"
-                    Value="#10B981"/>
-            <Setter Property="Foreground"
-                    Value="White"/>
-        </Style>
-
-        <Style x:Key="SuccessButtonStyle"
-               BasedOn="{StaticResource PrimaryButtonStyle}"
-               TargetType="Button">
-            <Setter Property="Background"
-                    Value="#34D399"/>
-            <Setter Property="Foreground"
-                    Value="White"/>
-        </Style>
-
-        <Style x:Key="AccentButtonStyle"
-               BasedOn="{StaticResource PrimaryButtonStyle}"
-               TargetType="Button">
-            <Setter Property="Background"
-                    Value="#8B5CF6"/>
-            <Setter Property="Foreground"
-                    Value="White"/>
-        </Style>
-
-        <Style x:Key="DataGridHeaderStyle"
-               TargetType="DataGridColumnHeader">
-            <Setter Property="Background"
-                    Value="{DynamicResource PrimaryHueLightBrush}"/>
-            <Setter Property="Foreground"
-                    Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-            <Setter Property="FontWeight"
-                    Value="SemiBold"/>
-            <Setter Property="Padding"
-                    Value="12,8"/>
-            <Setter Property="BorderThickness"
-                    Value="0,0,0,2"/>
-            <Setter Property="BorderBrush"
-                    Value="{DynamicResource PrimaryHueMidBrush}"/>
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Center"/>
-        </Style>
-
-        <Style x:Key="DataGridRowStyle"
-               TargetType="DataGridRow">
-            <Setter Property="BorderThickness"
-                    Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver"
-                         Value="True">
-                    <Setter Property="Background"
-                            Value="{DynamicResource PrimaryHueLightBrush}"/>
-                </Trigger>
-                <Trigger Property="IsSelected"
-                         Value="True">
-                    <Setter Property="Background"
-                            Value="{DynamicResource PrimaryHueMidBrush}"/>
-                    <Setter Property="Foreground"
-                            Value="White"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Event Type Badge Style -->
-        <Style x:Key="EventBadgeStyle"
-               TargetType="Border">
-            <Setter Property="CornerRadius"
-                    Value="4"/>
-            <Setter Property="Padding"
-                    Value="8,3"/>
-            <Setter Property="HorizontalAlignment"
-                    Value="Center"/>
-            <Setter Property="VerticalAlignment"
-                    Value="Center"/>
-        </Style>
-
-        <!-- Status Indicator Style -->
-        <Style x:Key="StatusIndicator"
-               TargetType="Border">
-            <Setter Property="Width"
-                    Value="12"/>
-            <Setter Property="Height"
-                    Value="12"/>
-            <Setter Property="CornerRadius"
-                    Value="6"/>
-            <Setter Property="Margin"
-                    Value="0,0,8,0"/>
-            <Setter Property="VerticalAlignment"
-                    Value="Center"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Header with Material Design Card -->
-        <materialDesign:Card Grid.Row="0"
-                             Padding="4"
-                             Background="{DynamicResource PrimaryHueLightBrush}"
-                             Margin="0,0,0,16">
-            <DockPanel>
-                <!-- Left Side: Title and Icon -->
-                <StackPanel DockPanel.Dock="Left">
-                    <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <materialDesign:PackIcon Kind="AccountClock"
-                                                 Width="32"
-                                                 Height="32"
-                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                 Margin="0,0,16,0"/>
-                        <StackPanel>
-                            <TextBlock Text="PICKUP REPORT"
-                                       Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                                       FontSize="22"
-                                       FontWeight="Bold"/>
-                            <TextBlock Text="Track student pickup events and guardian scans"
-                                       Foreground="{DynamicResource MaterialDesignBody}"
-                                       FontSize="14"
-                                       Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- Right Side: Record Count -->
-                <Border DockPanel.Dock="Right"
-                        Background="{DynamicResource MaterialDesignBackground}"
-                        CornerRadius="8"
-                        Padding="16,12"
-                        BorderThickness="1"
-                        BorderBrush="{DynamicResource MaterialDesignDivider}"
-                        Margin="20,0,0,0">
-                    <StackPanel>
-                        <TextBlock Text="TOTAL RECORDS"
-                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                   Foreground="{DynamicResource MaterialDesignBody}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,4"/>
-                        <TextBlock x:Name="RecordCountText"
-                                   Text="0"
-                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                                   Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
-            </DockPanel>
-        </materialDesign:Card>
-
-        <!-- Filter Panel with Material Design Card -->
-        <materialDesign:Card Grid.Row="1"
-                             Padding="20"
-                             Margin="0,0,0,16">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- Filter Title -->
-                <StackPanel Grid.Row="0"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0,0,0,16">
-                    <materialDesign:PackIcon Kind="FilterVariant"
-                                             Width="20"
-                                             Height="20"
-                                             Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                             Margin="0,0,8,0"/>
-                    <TextBlock Text="FILTER OPTIONS"
-                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                               Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                               FontWeight="Bold"/>
-                </StackPanel>
-
-                <!-- Filter Controls -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Date Range -->
-                    <StackPanel Grid.Column="0"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,20,0">
-                            <materialDesign:PackIcon Kind="CalendarRange"
-                                                     Width="18"
-                                                     Height="18"
-                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                     Margin="0,0,8,0"/>
-                            <TextBlock Text="Date Range:"
-                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,8,0"/>
-                        </StackPanel>
-                        <DatePicker x:Name="DateFromPicker"
-                                    Width="140"
-                                    materialDesign:HintAssist.Hint="From date"
-                                    SelectedDate="{x:Static sys:DateTime.Now}"
-                                    Margin="0,0,8,0"/>
-                        <TextBlock Text="to"
-                                   Margin="0,0,8,0"
-                                   VerticalAlignment="Center"
-                                   Style="{StaticResource MaterialDesignBody1TextBlock}"/>
-                        <DatePicker x:Name="DateToPicker"
-                                    Width="140"
-                                    materialDesign:HintAssist.Hint="To date"
-                                    SelectedDate="{x:Static sys:DateTime.Now}"/>
-                    </StackPanel>
-
-                    <!-- Student Filter -->
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Margin="30,0,0,0">
-                        <StackPanel Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,8,0">
-                            <materialDesign:PackIcon Kind="Account"
-                                                     Width="18"
-                                                     Height="18"
-                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                     Margin="0,0,4,0"/>
-                            <TextBlock Text="Student:"
-                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <ComboBox x:Name="StudentFilterComboBox"
-                                  Width="160"
-                                  materialDesign:HintAssist.Hint="All Students"
-                                  DisplayMemberPath="FullName"
-                                  SelectedValuePath="LocalId"/>
-                    </StackPanel>
-
-                    <!-- Event Type Filter -->
-                    <StackPanel Grid.Column="0"
-                                Grid.Row="1"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Margin="0,15,0,0">
-                        <StackPanel Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,8,0">
-                            <materialDesign:PackIcon Kind="TimelineText"
-                                                     Width="18"
-                                                     Height="18"
-                                                     Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                                     Margin="0,0,4,0"/>
-                            <TextBlock Text="Event Type:"
-                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <ComboBox x:Name="EventTypeComboBox"
-                                  Width="160"
-                                  materialDesign:HintAssist.Hint="All Events">
-                            <ComboBoxItem Content="All Events"
-                                          Tag="All"
-                                          IsSelected="True"/>
-                            <ComboBoxItem Content="Guardian Scan"
-                                          Tag="GuardianScan"/>
-                            <ComboBoxItem Content="Pickup Complete"
-                                          Tag="PickupComplete"/>
-                            <ComboBoxItem Content="Pickup Timeout"
-                                          Tag="PickupTimeout"/>
-                            <ComboBoxItem Content="Pickup Requested"
-                                          Tag="Requested"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Column="3"
-                                Grid.Row="1"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Margin="0,15,0,0">
-                        <Button x:Name="ClearFiltersButton"
-                                Content="CLEAR FILTERS"
-                                Click="ClearFilters_Click"
-                                Style="{StaticResource FilterButtonStyle}"
-                                Margin="0,0,10,0">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal"
-                                                HorizontalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="FilterRemove"
-                                                                 Width="16"
-                                                                 Height="16"
-                                                                 Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding}"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
-
-                        <Button x:Name="ApplyFiltersButton"
-                                Content="APPLY FILTERS"
-                                Click="ApplyFilters_Click"
-                                Style="{StaticResource SuccessButtonStyle}">
-                            <Button.ContentTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal"
-                                                HorizontalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="FilterCheck"
-                                                                 Width="16"
-                                                                 Height="16"
-                                                                 Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding}"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Button.ContentTemplate>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Grid>
-        </materialDesign:Card>
-
-        <!-- Pickup Events Data Grid -->
-        <materialDesign:Card Grid.Row="2"
-                             Padding="0"
-                             Margin="0,0,0,16">
-            <DataGrid x:Name="PickupDataGrid"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      CanUserReorderColumns="False"
-                      CanUserSortColumns="True"
-                      RowHeight="48"
-                      GridLinesVisibility="None"
-                      HeadersVisibility="Column"
-                      SelectionMode="Single"
-                      SelectionUnit="FullRow"
-                      BorderThickness="0"
-                      Background="Transparent">
-
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridColumnHeader"
-                           BasedOn="{StaticResource DataGridHeaderStyle}"/>
-                    <Style TargetType="DataGridRow"
-                           BasedOn="{StaticResource DataGridRowStyle}"/>
-                    <Style TargetType="DataGridCell">
+                <Style x:Key="FilterButtonStyle"
+                       BasedOn="{StaticResource PrimaryButtonStyle}"
+                       TargetType="Button">
+                        <Setter Property="Background"
+                                Value="{DynamicResource PrimaryHueLightBrush}"/>
+                        <Setter Property="Foreground"
+                                Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
                         <Setter Property="BorderThickness"
-                                Value="0"/>
+                                Value="1"/>
+                        <Setter Property="BorderBrush"
+                                Value="{DynamicResource PrimaryHueMidBrush}"/>
+                </Style>
+
+                <Style x:Key="ExportButtonStyle"
+                       BasedOn="{StaticResource PrimaryButtonStyle}"
+                       TargetType="Button">
+                        <Setter Property="Background"
+                                Value="#10B981"/>
+                        <Setter Property="Foreground"
+                                Value="White"/>
+                </Style>
+
+                <Style x:Key="SuccessButtonStyle"
+                       BasedOn="{StaticResource PrimaryButtonStyle}"
+                       TargetType="Button">
+                        <Setter Property="Background"
+                                Value="#34D399"/>
+                        <Setter Property="Foreground"
+                                Value="White"/>
+                </Style>
+
+                <Style x:Key="AccentButtonStyle"
+                       BasedOn="{StaticResource PrimaryButtonStyle}"
+                       TargetType="Button">
+                        <Setter Property="Background"
+                                Value="#8B5CF6"/>
+                        <Setter Property="Foreground"
+                                Value="White"/>
+                </Style>
+
+                <Style x:Key="DataGridHeaderStyle"
+                       TargetType="DataGridColumnHeader">
+                        <Setter Property="Background"
+                                Value="{DynamicResource PrimaryHueLightBrush}"/>
+                        <Setter Property="Foreground"
+                                Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+                        <Setter Property="FontWeight"
+                                Value="SemiBold"/>
                         <Setter Property="Padding"
                                 Value="12,8"/>
+                        <Setter Property="BorderThickness"
+                                Value="0,0,0,2"/>
+                        <Setter Property="BorderBrush"
+                                Value="{DynamicResource PrimaryHueMidBrush}"/>
+                        <Setter Property="HorizontalContentAlignment"
+                                Value="Center"/>
+                </Style>
+
+                <Style x:Key="DataGridRowStyle"
+                       TargetType="DataGridRow">
+                        <Setter Property="BorderThickness"
+                                Value="0"/>
+                        <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource PrimaryHueLightBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected"
+                                         Value="True">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource PrimaryHueMidBrush}"/>
+                                        <Setter Property="Foreground"
+                                                Value="White"/>
+                                </Trigger>
+                        </Style.Triggers>
+                </Style>
+
+                <!-- Event Type Badge Style -->
+                <Style x:Key="EventBadgeStyle"
+                       TargetType="Border">
+                        <Setter Property="CornerRadius"
+                                Value="4"/>
+                        <Setter Property="Padding"
+                                Value="8,3"/>
+                        <Setter Property="HorizontalAlignment"
+                                Value="Center"/>
                         <Setter Property="VerticalAlignment"
                                 Value="Center"/>
-                    </Style>
-                </DataGrid.Resources>
+                </Style>
 
-                <DataGrid.Columns>
-                    <!-- Date/Time -->
-                    <DataGridTextColumn Header="📅 DATE/TIME"
-                                        Binding="{Binding Timestamp, StringFormat='dd-MMM-yyyy HH:mm'}"
-                                        Width="160">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="HorizontalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="FontFamily"
-                                        Value="Consolas"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
+                <!-- Status Indicator Style -->
+                <Style x:Key="StatusIndicator"
+                       TargetType="Border">
+                        <Setter Property="Width"
+                                Value="12"/>
+                        <Setter Property="Height"
+                                Value="12"/>
+                        <Setter Property="CornerRadius"
+                                Value="6"/>
+                        <Setter Property="Margin"
+                                Value="0,0,8,0"/>
+                        <Setter Property="VerticalAlignment"
+                                Value="Center"/>
+                </Style>
+        </Window.Resources>
 
-                    <!-- Event Type -->
-                    <DataGridTemplateColumn Header="🔰 EVENT TYPE"
-                                            Width="140">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border Style="{StaticResource EventBadgeStyle}"
-                                        Background="{Binding EventColor, Converter={StaticResource EventTypeToColorConverter}}">
-                                    <StackPanel Orientation="Horizontal"
-                                                VerticalAlignment="Center">
-                                        <Border Style="{StaticResource StatusIndicator}"
-                                                Background="{Binding EventColor, Converter={StaticResource EventTypeToColorConverter}}"/>
-                                        <TextBlock Text="{Binding EventType}"
-                                                   Foreground="gray"
+        <Grid Margin="20">
+                <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header with Material Design Card -->
+                <materialDesign:Card Grid.Row="0"
+                                     Padding="4"
+                                     Background="{DynamicResource PrimaryHueLightBrush}"
+                                     Margin="0,0,0,16">
+                        <DockPanel>
+                                <!-- Left Side: Title and Icon -->
+                                <StackPanel DockPanel.Dock="Left">
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                                <materialDesign:PackIcon Kind="AccountClock"
+                                                                         Width="32"
+                                                                         Height="32"
+                                                                         Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                         Margin="0,0,16,0"/>
+                                                <StackPanel>
+                                                        <TextBlock Text="PICKUP REPORT"
+                                                                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                                                   FontSize="22"
+                                                                   FontWeight="Bold"/>
+                                                        <TextBlock Text="Track student pickup events and guardian scans"
+                                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                                   FontSize="14"
+                                                                   Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                        </StackPanel>
+                                </StackPanel>
+
+
+                        </DockPanel>
+                </materialDesign:Card>
+
+                <!-- Filter Panel with Material Design Card -->
+                <materialDesign:Card Grid.Row="1"
+                                     Padding="5"
+                                     Margin="0,0,0,16">
+                        <Grid>
+                                <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Filter Title -->
+                                <StackPanel Grid.Row="0"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,0,16">
+                                        <materialDesign:PackIcon Kind="FilterVariant"
+                                                                 Width="20"
+                                                                 Height="20"
+                                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                 Margin="0,0,8,0"/>
+                                        <TextBlock Text="FILTER OPTIONS"
+                                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                                   FontWeight="Bold"/>
+                                </StackPanel>
+
+                                <!-- Filter Controls -->
+                                <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Date Range -->
+                                        <StackPanel Grid.Column="0"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,20,0">
+                                                        <materialDesign:PackIcon Kind="CalendarRange"
+                                                                                 Width="18"
+                                                                                 Height="18"
+                                                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                                 Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Date Range:"
+                                                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="0,0,8,0"/>
+                                                </StackPanel>
+                                                <DatePicker x:Name="DateFromPicker"
+                                                            Width="140"
+                                                            materialDesign:HintAssist.Hint="From date"
+                                                            SelectedDate="{x:Static sys:DateTime.Now}"
+                                                            Margin="0,0,8,0"/>
+                                                <TextBlock Text="to"
+                                                           Margin="0,0,8,0"
+                                                           VerticalAlignment="Center"
+                                                           Style="{StaticResource MaterialDesignBody1TextBlock}"/>
+                                                <DatePicker x:Name="DateToPicker"
+                                                            Width="140"
+                                                            materialDesign:HintAssist.Hint="To date"
+                                                            SelectedDate="{x:Static sys:DateTime.Now}"/>
+                                        </StackPanel>
+
+                                        <!-- Student Filter -->
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="30,0,0,0">
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,8,0">
+                                                        <materialDesign:PackIcon Kind="Account"
+                                                                                 Width="18"
+                                                                                 Height="18"
+                                                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                                 Margin="0,0,4,0"/>
+                                                        <TextBlock Text="Student:"
+                                                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                                                   VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <ComboBox x:Name="StudentFilterComboBox"
+                                                          Width="160"
+                                                          materialDesign:HintAssist.Hint="All Students"
+                                                          DisplayMemberPath="FullName"
+                                                          SelectedValuePath="LocalId"/>
+                                        </StackPanel>
+
+                                        <!-- Event Type Filter -->
+                                        <StackPanel Grid.Column="0"
+                                                    Grid.Row="1"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,15,0,0">
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,8,0">
+                                                        <materialDesign:PackIcon Kind="TimelineText"
+                                                                                 Width="18"
+                                                                                 Height="18"
+                                                                                 Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                                 Margin="0,0,4,0"/>
+                                                        <TextBlock Text="Event Type:"
+                                                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                                                   VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <ComboBox x:Name="EventTypeComboBox"
+                                                          Width="160"
+                                                          materialDesign:HintAssist.Hint="All Events">
+                                                        <ComboBoxItem Content="All Events"
+                                                                      Tag="All"
+                                                                      IsSelected="True"/>
+                                                        <ComboBoxItem Content="Guardian Scan"
+                                                                      Tag="GuardianScan"/>
+                                                        <ComboBoxItem Content="Pickup Complete"
+                                                                      Tag="PickupComplete"/>
+                                                        <ComboBoxItem Content="Pickup Timeout"
+                                                                      Tag="PickupTimeout"/>
+                                                        <ComboBoxItem Content="Pickup Requested"
+                                                                      Tag="Requested"/>
+                                                </ComboBox>
+                                        </StackPanel>
+
+                                        <!-- Action Buttons -->
+                                        <StackPanel Grid.Column="3"
+                                                    Grid.Row="1"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,15,0,0">
+                                                <Button x:Name="ClearFiltersButton"
+                                                        Content="CLEAR FILTERS"
+                                                        Click="ClearFilters_Click"
+                                                        Style="{StaticResource FilterButtonStyle}"
+                                                        Margin="0,0,10,0">
+                                                        <Button.ContentTemplate>
+                                                                <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal"
+                                                                                    HorizontalAlignment="Center">
+                                                                                <materialDesign:PackIcon Kind="FilterRemove"
+                                                                                                         Width="16"
+                                                                                                         Height="16"
+                                                                                                         Margin="0,0,6,0"/>
+                                                                                <TextBlock Text="{Binding}"
+                                                                                           VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                </DataTemplate>
+                                                        </Button.ContentTemplate>
+                                                </Button>
+
+                                                <Button x:Name="ApplyFiltersButton"
+                                                        Content="APPLY FILTERS"
+                                                        Click="ApplyFilters_Click"
+                                                        Style="{StaticResource SuccessButtonStyle}">
+                                                        <Button.ContentTemplate>
+                                                                <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal"
+                                                                                    HorizontalAlignment="Center">
+                                                                                <materialDesign:PackIcon Kind="FilterCheck"
+                                                                                                         Width="16"
+                                                                                                         Height="16"
+                                                                                                         Margin="0,0,6,0"/>
+                                                                                <TextBlock Text="{Binding}"
+                                                                                           VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                </DataTemplate>
+                                                        </Button.ContentTemplate>
+                                                </Button>
+                                        </StackPanel>
+                                </Grid>
+                        </Grid>
+                </materialDesign:Card>
+
+                <!-- Pickup Events Data Grid -->
+                <materialDesign:Card Grid.Row="2"
+                                     Padding="0"
+                                     Margin="0,0,0,16">
+                        <DataGrid x:Name="PickupDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserSortColumns="True"
+                                  RowHeight="48"
+                                  GridLinesVisibility="None"
+                                  HeadersVisibility="Column"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  BorderThickness="0"
+                                  Background="Transparent">
+
+                                <DataGrid.Resources>
+                                        <Style TargetType="DataGridColumnHeader"
+                                               BasedOn="{StaticResource DataGridHeaderStyle}"/>
+                                        <Style TargetType="DataGridRow"
+                                               BasedOn="{StaticResource DataGridRowStyle}"/>
+                                        <Style TargetType="DataGridCell">
+                                                <Setter Property="BorderThickness"
+                                                        Value="0"/>
+                                                <Setter Property="Padding"
+                                                        Value="12,8"/>
+                                                <Setter Property="VerticalAlignment"
+                                                        Value="Center"/>
+                                        </Style>
+                                </DataGrid.Resources>
+
+                                <DataGrid.Columns>
+                                        <!-- Date/Time -->
+                                        <DataGridTextColumn Header="📅 DATE/TIME"
+                                                            Binding="{Binding Timestamp, StringFormat='dd-MMM-yyyy HH:mm'}"
+                                                            Width="160">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="HorizontalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="FontFamily"
+                                                                        Value="Consolas"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Event Type -->
+                                        <DataGridTemplateColumn Header="🔰 EVENT TYPE"
+                                                                Width="140">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                                <Border Style="{StaticResource EventBadgeStyle}"
+                                                                        Background="{Binding EventColor, Converter={StaticResource EventTypeToColorConverter}}">
+                                                                        <StackPanel Orientation="Horizontal"
+                                                                                    VerticalAlignment="Center">
+                                                                                <Border Style="{StaticResource StatusIndicator}"
+                                                                                        Background="{Binding EventColor, Converter={StaticResource EventTypeToColorConverter}}"/>
+                                                                                <TextBlock Text="{Binding EventType}"
+                                                                                           Foreground="gray"
+                                                                                           FontWeight="SemiBold"
+                                                                                           FontSize="11"
+                                                                                           VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                </Border>
+                                                        </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- Student ID -->
+                                        <DataGridTextColumn Header="🎫 STUDENT ID"
+                                                            Binding="{Binding StudentId}"
+                                                            Width="100">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="HorizontalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="FontFamily"
+                                                                        Value="Consolas"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Student Name -->
+                                        <DataGridTextColumn Header="👤 STUDENT NAME"
+                                                            Binding="{Binding StudentName}"
+                                                            Width="180">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="FontWeight"
+                                                                        Value="Medium"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Class -->
+                                        <DataGridTextColumn Header="🏫 CLASS"
+                                                            Binding="{Binding ClassName}"
+                                                            Width="120">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="HorizontalAlignment"
+                                                                        Value="Center"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Guardian ID -->
+                                        <DataGridTextColumn Header="🔑 GUARDIAN ID"
+                                                            Binding="{Binding GuardianId}"
+                                                            Width="100">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="HorizontalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="FontFamily"
+                                                                        Value="Consolas"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Guardian Name -->
+                                        <DataGridTextColumn Header="👨‍👦 GUARDIAN NAME"
+                                                            Binding="{Binding GuardianName}"
+                                                            Width="180">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="FontWeight"
+                                                                        Value="Medium"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <!-- Details -->
+                                        <DataGridTextColumn Header="📝 DETAILS"
+                                                            Binding="{Binding Details}"
+                                                            Width="*">
+                                                <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                                <Setter Property="VerticalAlignment"
+                                                                        Value="Center"/>
+                                                                <Setter Property="TextWrapping"
+                                                                        Value="Wrap"/>
+                                                                <Setter Property="MaxHeight"
+                                                                        Value="60"/>
+                                                        </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                </DataGrid.Columns>
+                        </DataGrid>
+                </materialDesign:Card>
+
+                <!-- Footer Actions -->
+                <materialDesign:Card Grid.Row="3"
+                                     Padding="16"
+                                     Background="{DynamicResource PrimaryHueLightBrush}">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                                <!-- Export Options -->
+                                <StackPanel Orientation="Horizontal"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,40,0">
+                                        <TextBlock Text="EXPORT OPTIONS:"
+                                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
                                                    FontWeight="SemiBold"
-                                                   FontSize="11"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                                                   Margin="0,0,12,0"/>
 
-                    <!-- Student ID -->
-                    <DataGridTextColumn Header="🎫 STUDENT ID"
-                                        Binding="{Binding StudentId}"
+                                        <Button Content="CSV"
+                                                Click="ExportToCsv_Click"
+                                                Style="{StaticResource ExportButtonStyle}"
+                                                ToolTip="Export to CSV format"
+                                                Margin="0,0,8,0">
+                                                <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal"
+                                                                            HorizontalAlignment="Center">
+                                                                        <materialDesign:PackIcon Kind="FileExport"
+                                                                                                 Width="16"
+                                                                                                 Height="16"
+                                                                                                 Margin="0,0,6,0"/>
+                                                                        <TextBlock Text="{Binding}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                        </DataTemplate>
+                                                </Button.ContentTemplate>
+                                        </Button>
+
+                                        <Button Content="PRINT"
+                                                Click="PrintReport_Click"
+                                                Style="{StaticResource FilterButtonStyle}"
+                                                ToolTip="Print report"
+                                                Margin="0,0,8,0">
+                                                <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal"
+                                                                            HorizontalAlignment="Center">
+                                                                        <materialDesign:PackIcon Kind="Printer"
+                                                                                                 Width="16"
+                                                                                                 Height="16"
+                                                                                                 Margin="0,0,6,0"/>
+                                                                        <TextBlock Text="{Binding}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                        </DataTemplate>
+                                                </Button.ContentTemplate>
+                                        </Button>
+
+                                        <Button Content="SUMMARY"
+                                                Click="ShowSummary_Click"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                ToolTip="Show summary statistics">
+                                                <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal"
+                                                                            HorizontalAlignment="Center">
+                                                                        <materialDesign:PackIcon Kind="ChartBox"
+                                                                                                 Width="16"
+                                                                                                 Height="16"
+                                                                                                 Margin="0,0,6,0"/>
+                                                                        <TextBlock Text="{Binding}"
+                                                                                   VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                        </DataTemplate>
+                                                </Button.ContentTemplate>
+                                        </Button>
+                                </StackPanel>
+
+                                <!-- Close Button -->
+                                <Button x:Name="CloseButton"
+                                        Content="CLOSE"
+                                        Click="CloseButton_Click"
+                                        Style="{StaticResource FilterButtonStyle}"
                                         Width="100">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="HorizontalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="FontFamily"
-                                        Value="Consolas"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- Student Name -->
-                    <DataGridTextColumn Header="👤 STUDENT NAME"
-                                        Binding="{Binding StudentName}"
-                                        Width="180">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="FontWeight"
-                                        Value="Medium"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- Class -->
-                    <DataGridTextColumn Header="🏫 CLASS"
-                                        Binding="{Binding ClassName}"
-                                        Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="HorizontalAlignment"
-                                        Value="Center"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- Guardian ID -->
-                    <DataGridTextColumn Header="🔑 GUARDIAN ID"
-                                        Binding="{Binding GuardianId}"
-                                        Width="100">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="HorizontalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="FontFamily"
-                                        Value="Consolas"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- Guardian Name -->
-                    <DataGridTextColumn Header="👨‍👦 GUARDIAN NAME"
-                                        Binding="{Binding GuardianName}"
-                                        Width="180">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="FontWeight"
-                                        Value="Medium"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-
-                    <!-- Details -->
-                    <DataGridTextColumn Header="📝 DETAILS"
-                                        Binding="{Binding Details}"
-                                        Width="*">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="VerticalAlignment"
-                                        Value="Center"/>
-                                <Setter Property="TextWrapping"
-                                        Value="Wrap"/>
-                                <Setter Property="MaxHeight"
-                                        Value="60"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </materialDesign:Card>
-
-        <!-- Footer Actions -->
-        <materialDesign:Card Grid.Row="3"
-                             Padding="16"
-                             Background="{DynamicResource PrimaryHueLightBrush}">
-            <StackPanel Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                <!-- Export Options -->
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0,0,40,0">
-                    <TextBlock Text="EXPORT OPTIONS:"
-                               Style="{StaticResource MaterialDesignBody1TextBlock}"
-                               Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                               FontWeight="SemiBold"
-                               Margin="0,0,12,0"/>
-
-                    <Button Content="CSV"
-                            Click="ExportToCsv_Click"
-                            Style="{StaticResource ExportButtonStyle}"
-                            ToolTip="Export to CSV format"
-                            Margin="0,0,8,0">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="FileExport"
-                                                             Width="16"
-                                                             Height="16"
-                                                             Margin="0,0,6,0"/>
-                                    <TextBlock Text="{Binding}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
-
-                    <Button Content="PRINT"
-                            Click="PrintReport_Click"
-                            Style="{StaticResource FilterButtonStyle}"
-                            ToolTip="Print report"
-                            Margin="0,0,8,0">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="Printer"
-                                                             Width="16"
-                                                             Height="16"
-                                                             Margin="0,0,6,0"/>
-                                    <TextBlock Text="{Binding}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
-
-                    <Button Content="SUMMARY"
-                            Click="ShowSummary_Click"
-                            Style="{StaticResource AccentButtonStyle}"
-                            ToolTip="Show summary statistics">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ChartBox"
-                                                             Width="16"
-                                                             Height="16"
-                                                             Margin="0,0,6,0"/>
-                                    <TextBlock Text="{Binding}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
-                </StackPanel>
-
-                <!-- Close Button -->
-                <Button x:Name="CloseButton"
-                        Content="CLOSE"
-                        Click="CloseButton_Click"
-                        Style="{StaticResource FilterButtonStyle}"
-                        Width="100">
-                    <Button.ContentTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="Close"
-                                                         Width="16"
-                                                         Height="16"
-                                                         Margin="0,0,6,0"/>
-                                <TextBlock Text="{Binding}"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </Button.ContentTemplate>
-                </Button>
-            </StackPanel>
-        </materialDesign:Card>
-    </Grid>
+                                        <Button.ContentTemplate>
+                                                <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal"
+                                                                    HorizontalAlignment="Center">
+                                                                <materialDesign:PackIcon Kind="Close"
+                                                                                         Width="16"
+                                                                                         Height="16"
+                                                                                         Margin="0,0,6,0"/>
+                                                                <TextBlock Text="{Binding}"
+                                                                           VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                </DataTemplate>
+                                        </Button.ContentTemplate>
+                                </Button>
+                        </StackPanel>
+                </materialDesign:Card>
+        </Grid>
 </Window>

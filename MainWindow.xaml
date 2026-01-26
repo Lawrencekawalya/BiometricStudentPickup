@@ -472,7 +472,7 @@
                                              Foreground="#22C55E"
                                              VerticalAlignment="Center"
                                              Margin="0,0,6,0"/>
-                    <TextBlock Text="All systems operational"
+                    <TextBlock Text="Powered By Syntax Systems Ltd"
                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
                                Foreground="{DynamicResource MaterialDesignBody}"
                                VerticalAlignment="Center"/>
@@ -494,10 +494,13 @@
                                              Foreground="{DynamicResource PrimaryHueMidBrush}"
                                              VerticalAlignment="Center"
                                              Margin="0,0,6,0"/>
-                    <TextBlock Text="Last sync: Now"
-                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                               Foreground="{DynamicResource MaterialDesignBody}"
-                               VerticalAlignment="Center"/>
+                    <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               VerticalAlignment="Center">
+                    Last sync: 
+                    <Run Text="Just Now"
+                         Foreground="#10B981"
+                         FontWeight="Medium"/>
+                    </TextBlock>
                 </StackPanel>
 
             </StackPanel>
