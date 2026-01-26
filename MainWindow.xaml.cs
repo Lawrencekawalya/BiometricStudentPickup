@@ -1428,8 +1428,29 @@ namespace BiometricStudentPickup
                 }
             }
 
+
             // 2. Open Student Management window
-            var window = new StudentManagementWindow
+            // Check if fingerprint service is available
+            if (_fingerprintService == null)
+            {
+                MessageBox.Show(
+                    "Fingerprint device is not ready. Please ensure the device is connected and try again.",
+                    "Device Not Ready",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+                return;
+            }
+
+            var window = new StudentManagementWindow(
+                _studentRegistry,
+                _guardianRegistry,
+                _guardianStudentRegistry,
+                _fingerprintService,     // Now we know it's not null
+                _databaseService,
+                _auditLogService,
+                _adminSecurity
+            )
             {
                 Owner = this
             };

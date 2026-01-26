@@ -142,11 +142,11 @@
 
                             <!-- Search box -->
                             <TextBox x:Name="StudentSearchBox"
-                                    Height="36"
-                                    Margin="0,0,0,8"
-                                    Padding="10,6"
-                                    FontSize="14"
-                                    TextChanged="StudentSearchBox_TextChanged"/>
+                                     Height="36"
+                                     Margin="0,0,0,8"
+                                     Padding="10,6"
+                                     FontSize="14"
+                                     TextChanged="StudentSearchBox_TextChanged"/>
 
                             <Border BorderThickness="1"
                                     BorderBrush="#D1D5DB"
