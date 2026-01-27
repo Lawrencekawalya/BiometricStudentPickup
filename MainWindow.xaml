@@ -438,7 +438,7 @@
                            Margin="8,0"/>
 
                 <!-- Version -->
-                <TextBlock Text="v2.1.1"
+                <TextBlock Text="v2.1.3"
                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
                            Foreground="{DynamicResource MaterialDesignBody}"
                            VerticalAlignment="Center"/>

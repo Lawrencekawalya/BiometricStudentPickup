@@ -10,11 +10,11 @@ none
 false
 TRACE;RELEASE;NET;NET8_0;NETCOREAPP
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\App.xaml
-6-848904766
+7-145188104
 
-291072144171
-2151286012941
-AttendanceReportWindow.xaml;EnrollmentWindow.xaml;MainWindow.xaml;PickupReportWindow.xaml;Views\CreatePinDialog.xaml;Views\PinDialog.xaml;
+34-2138472881
+2181776265327
+AttendanceReportWindow.xaml;EnrollmentWindow.xaml;MainWindow.xaml;PickupReportWindow.xaml;Views\CreatePinDialog.xaml;Views\PinDialog.xaml;Views\StudentManagementWindow.xaml;
 
 False
 

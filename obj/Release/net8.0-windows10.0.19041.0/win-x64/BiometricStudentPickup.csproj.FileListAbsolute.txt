@@ -500,3 +500,9 @@ C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Relea
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\BiometricStudentPickup.genruntimeconfig.cache
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\ref\BiometricStudentPickup.dll
 C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\BiometricStudentPickup.sourcelink.json
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\bin\Release\net8.0-windows10.0.19041.0\win-x64\MaterialDesignColors.dll
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\bin\Release\net8.0-windows10.0.19041.0\win-x64\MaterialDesignThemes.Wpf.dll
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\bin\Release\net8.0-windows10.0.19041.0\win-x64\Microsoft.Xaml.Behaviors.dll
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\Views\StudentManagementWindow.baml
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\App.baml
+C:\Users\Administrator\Biometric Student Pickup\BiometricStudentPickup\obj\Release\net8.0-windows10.0.19041.0\win-x64\Views\StudentManagementWindow.g.cs
